@@ -7,8 +7,8 @@ int main(int argc, char *argv[]) {
     MainWindow window;
 
     window.setAcceptDrops(true);
-    window.resize(320, 240);
-    window.setWindowTitle("APB Mission Text Edit");
+    window.resize(900, 900);
+    window.setWindowTitle("localedit");
     window.show();
 
     return app.exec();

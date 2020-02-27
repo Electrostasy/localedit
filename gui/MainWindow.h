@@ -14,14 +14,16 @@ private:
 	// Map of mission codes to mission names
     QMap<QString, QString> missionMap;
 	// Map of mission codes to sides of stages that have mission text
-    QMap<QString, QPair<QString, QVector<QString>>> missionStagesMap;
+    QMap<QString, QPair<QVector<QString>, QVector<QString>>> missionStagesMap;
 
 	QListWidget *missionList;
+	QTabWidget *tabWidget;
 
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
 
     void addMissionToList(const QString &missionCode, const QString &missionName);
+    void clearLayout(QLayout *layout);
 };
 
 #endif
