@@ -87,9 +87,8 @@ MainWindow::MainWindow(QWidget* parent) {
 			}
 		});
 
-		auto* stagesLayout = new QVBoxLayout();
-		stagesLayout->addWidget(tabWidget);
-		masterHorizontalLayout->addLayout(stagesLayout);
+		mainWindowLayout->addWidget(new PreviewBox(), 0, 1);
+		mainWindowLayout->addWidget(tabWidget, 1, 1);
 	}
 }
 
