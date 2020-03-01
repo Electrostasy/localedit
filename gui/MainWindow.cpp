@@ -1,15 +1,10 @@
-#include <QtGui>
-#include <QWidget>
-
 #include "MainWindow.h"
 
 MainWindow::MainWindow(QWidget* parent) {
 	// Stack all widgets (layouts) horizontally
-	auto masterHorizontalLayout = new QHBoxLayout(this);
+	auto mainWindowLayout = new QGridLayout(this);
 
-	{ // Construct vertical column for mission selection
-		auto label = new QLabel("Missions");
-
+	{ // Construct mission list
 		auto missionSearch = new QLineEdit();
 		missionSearch->setPlaceholderText("Search missions...");
 
@@ -30,12 +25,10 @@ MainWindow::MainWindow(QWidget* parent) {
 
 		// Add widgets to a vertical layout
 		auto missionsLayout = new QVBoxLayout();
-		missionsLayout->addWidget(label);
 		missionsLayout->addWidget(missionSearch);
 		missionsLayout->addWidget(missionList);
 
-		// Add the vertical layout for missions to the main window
-		masterHorizontalLayout->addLayout(missionsLayout);
+		mainWindowLayout->addLayout(missionsLayout, 0, 0, 0, 1);
 	}
 
 	{ // Construct preview and stages editor
@@ -51,25 +44,46 @@ MainWindow::MainWindow(QWidget* parent) {
 
 		// Items selected in the mission list will update the stages
 		connect(missionList, &QListWidget::itemClicked, this, [=](const QListWidgetItem* item) {
+			// TODO Make it so the scrollArea isn't rebuilt every single time
 			clearLayout(tabOwner->layout());
 			clearLayout(tabDispatch->layout());
 
-			// TODO stages expand window size, implement scrollbar instead
-
 			auto missionCode = item->data(Qt::UserRole).toString();
 
+			auto ownerScrollArea = new QScrollArea();
+			ownerScrollArea->setLayout(new QVBoxLayout());
+			tabOwner->layout()->addWidget(ownerScrollArea);
+
+			int i = 1;
 			foreach (const QString& stage, missionStagesMap[missionCode].first) {
 				auto textField = new QPlainTextEdit(tabOwner);
 				textField->setPlainText(stage);
 
-				tabOwner->layout()->addWidget(textField);
+				auto layout = new QVBoxLayout();
+				layout->addWidget(textField);
+
+				auto box = new QGroupBox("Stage " + QString::number(i));
+				box->setLayout(layout);
+				ownerScrollArea->layout()->addWidget(box);
+				i++;
 			}
 
+			auto dispatchScrollArea = new QScrollArea();
+			dispatchScrollArea->setLayout(new QVBoxLayout());
+			tabDispatch->layout()->addWidget(dispatchScrollArea);
+
+			int j = 1;
 			foreach (const QString& stage, missionStagesMap[missionCode].second) {
 				auto textField = new QPlainTextEdit(tabDispatch);
 				textField->setPlainText(stage);
 
-				tabDispatch->layout()->addWidget(textField);
+				auto layout = new QVBoxLayout();
+				layout->addWidget(textField);
+
+				auto box = new QGroupBox("Stage " + QString::number(j));
+				box->setLayout(layout);
+				dispatchScrollArea->layout()->addWidget(box);
+				j++;
 			}
 		});
 

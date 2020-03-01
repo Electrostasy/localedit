@@ -4,6 +4,8 @@
 #include <QtWidgets>
 #include <QPlainTextEdit>
 
+#include "PreviewBox.h"
+
 class MainWindow: public QWidget {
 Q_OBJECT
 
@@ -15,7 +17,6 @@ private:
     QMap<QString, QString> missionMap;
 	// Map of mission codes to sides of stages that have mission text
     QMap<QString, QPair<QVector<QString>, QVector<QString>>> missionStagesMap;
-
 	QListWidget *missionList;
 	QTabWidget *tabWidget;
 
@@ -23,7 +24,7 @@ private:
     void dropEvent(QDropEvent *event) override;
 
     void addMissionToList(const QString &missionCode, const QString &missionName);
-    void clearLayout(QLayout *layout);
+    static void clearLayout(QLayout *layout);
 };
 
 #endif
