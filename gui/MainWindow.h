@@ -5,6 +5,7 @@
 #include <QPlainTextEdit>
 
 #include "PreviewBox.h"
+#include "SyntaxHighlighter.h"
 
 class MainWindow: public QWidget {
 Q_OBJECT

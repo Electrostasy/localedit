@@ -56,8 +56,10 @@ MainWindow::MainWindow(QWidget* parent) {
 
 			int i = 1;
 			foreach (const QString& stage, missionStagesMap[missionCode].first) {
-				auto textField = new QPlainTextEdit(tabOwner);
+				auto textField = new QTextEdit(tabOwner);
 				textField->setPlainText(stage);
+
+				auto highlighter = new SyntaxHighlighter(textField->document());
 
 				auto layout = new QVBoxLayout();
 				layout->addWidget(textField);
@@ -74,8 +76,10 @@ MainWindow::MainWindow(QWidget* parent) {
 
 			int j = 1;
 			foreach (const QString& stage, missionStagesMap[missionCode].second) {
-				auto textField = new QPlainTextEdit(tabDispatch);
+				auto textField = new QTextEdit(tabDispatch);
 				textField->setPlainText(stage);
+
+				auto highlighter = new SyntaxHighlighter(textField->document());
 
 				auto layout = new QVBoxLayout();
 				layout->addWidget(textField);
