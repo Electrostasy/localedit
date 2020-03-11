@@ -7,7 +7,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-set(SOURCE_FILES main.cpp gui/MainWindow.h gui/MainWindow.cpp gui/PreviewBox.cpp gui/PreviewBox.h gui/SyntaxHighlighter.cpp gui/SyntaxHighlighter.h)
+set(SOURCE_FILES main.cpp gui/MainWindow.h gui/MainWindow.cpp gui/PreviewBox.cpp gui/PreviewBox.h gui/SyntaxHighlighter.cpp gui/SyntaxHighlighter.h gui/MissionListWidget.cpp gui/MissionListWidget.h gui/StagesEditorWidget.cpp gui/StagesEditorWidget.h)
 
 # find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)

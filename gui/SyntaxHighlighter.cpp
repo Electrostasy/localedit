@@ -8,8 +8,8 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument *parent): QSyntaxHighlighter(
     formatColour.setForeground(QColor(2, 44, 252));
     formatColour.setFontWeight(QFont::Bold);
     formatText.setForeground(QColor(2, 169, 252));
-    formatText.setFontWeight(QFont::Bold);
-    formatPunctuation.setForeground(QColor(252, 2, 169));
+    formatPunctuation.setForeground(QColor(0xfc, 0x7c, 0x05));
+    formatPunctuation.setFontWeight(QFont::Bold);
 }
 
 void SyntaxHighlighter::highlightBlock(const QString &text) {
