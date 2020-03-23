@@ -1,5 +1,4 @@
-#ifndef STAGESEDITORWIDGET_H
-#define STAGESEDITORWIDGET_H
+#pragma once
 
 #include <QWidget>
 #include <QtWidgets>
@@ -21,5 +20,3 @@ class StagesEditorWidget: public QWidget {
 	static void clearLayout(QLayout *layout);
 	static void populatePage(QWidget *page, const QVector<QString>& stages);
 };
-
-#endif

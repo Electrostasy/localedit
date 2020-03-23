@@ -1,5 +1,4 @@
-#ifndef SYNTAXHIGHLIGHTER_H
-#define SYNTAXHIGHLIGHTER_H
+#pragma once
 
 #include <QtGui/QSyntaxHighlighter>
 
@@ -18,6 +17,3 @@ private:
     QTextCharFormat formatText;
     QTextCharFormat formatColour;
 };
-
-
-#endif

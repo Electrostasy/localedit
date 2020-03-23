@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QtWidgets>
 
@@ -15,9 +14,7 @@ class MainWindow: public QMainWindow {
 
 	private:
 	MissionListWidget *missionListWidget;
-	// PreviewBoxWidget *previewBoxWidget;
+	PreviewBoxWidget *previewBoxWidget;
 	StagesEditorWidget *stagesEditorWidget;
 	QStatusBar *statusBarWidget;
 };
-
-#endif

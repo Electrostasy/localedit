@@ -1,5 +1,4 @@
-#ifndef APB_CONFIG_PREVIEWBOXWIDGET_H
-#define APB_CONFIG_PREVIEWBOXWIDGET_H
+#pragma once
 
 #include <QWidget>
 #include <QtGui>
@@ -23,5 +22,3 @@ class PreviewBoxWidget: public QWidget {
 	static void setPaletteBG(QWidget *widget, const QColor& colour);
 	static void setPaletteFG(QWidget *widget, const QColor& colour);
 };
-
-#endif

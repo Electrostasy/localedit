@@ -1,5 +1,4 @@
-#ifndef MISSIONLISTWIDGET_H
-#define MISSIONLISTWIDGET_H
+#pragma once
 
 #include <QLayout>
 #include <QMimeData>
@@ -33,5 +32,3 @@ class MissionListWidget: public QWidget {
 	void dragEnterEvent(QDragEnterEvent *event) override;
 	void dropEvent(QDropEvent *event) override;
 };
-
-#endif
