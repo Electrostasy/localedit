@@ -24,7 +24,10 @@ class MissionListWidget: public QWidget {
 	QListWidget *missionList;
 
 	explicit MissionListWidget(QWidget *parent = nullptr);
-	[[nodiscard]] double addMissionToList(const QString &missionCode, const QString &missionName) const;
+	[[nodiscard]] int addMissionToList(const QString &missionCode, const QString &missionName) const;
+
+	// signals:
+	// void missionSelected(QListWidgetItem *selectedItem);
 
 	private:
 	void dragEnterEvent(QDragEnterEvent *event) override;

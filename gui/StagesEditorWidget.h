@@ -19,6 +19,7 @@ class StagesEditorWidget: public QWidget {
 
 	private:
 	static void clearLayout(QLayout *layout);
+	static void populatePage(QWidget *page, const QVector<QString>& stages);
 };
 
 #endif

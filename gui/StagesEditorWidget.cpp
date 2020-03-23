@@ -24,46 +24,15 @@ StagesEditorWidget::StagesEditorWidget(MissionListWidget *missionListWidget) {
 	layout->addWidget(tabWidget);
 
 	// Items selected in the mission list will update the stages
-	connect(missionListWidget->missionList, &QListWidget::currentItemChanged, this, [=](const QListWidgetItem *currentItem) {
-		clearLayout(ownerPage->layout());
-		clearLayout(dispatchPage->layout());
+	connect(missionListWidget->missionList, &QListWidget::currentItemChanged, this,
+		[=](const QListWidgetItem *currentItem) {
+			clearLayout(ownerPage->layout());
+			clearLayout(dispatchPage->layout());
 
-		auto missionCode = currentItem->data(Qt::UserRole).toString();
+			auto missionCode = currentItem->data(Qt::UserRole).toString();
 
-			int i = 1;
-			foreach(const QString &stage, missionListWidget->missionStagesMap[missionCode].first) {
-				auto *textField = new QTextEdit(ownerPage);
-				textField->setPlainText(stage);
-
-				new SyntaxHighlighter(textField->document());
-
-				auto *layout = new QVBoxLayout();
-				layout->addWidget(textField);
-
-				auto *box = new QGroupBox("Stage " + QString::number(i));
-				box->setFlat(true);
-				box->setLayout(layout);
-				ownerPage->layout()->addWidget(box);
-				i++;
-			}
-
-			int j = 1;
-			foreach(const QString &stage, missionListWidget->missionStagesMap[missionCode].second) {
-				auto *textField = new QTextEdit(dispatchPage);
-				textField->setPlainText(stage);
-
-				new SyntaxHighlighter(textField->document());
-
-				auto *layout = new QVBoxLayout();
-				layout->addWidget(textField);
-
-				auto *box = new QGroupBox("Stage " + QString::number(j));
-				box->setLayout(layout);
-				box->setFlat(true);
-
-				dispatchPage->layout()->addWidget(box);
-				j++;
-			}
+			populatePage(ownerPage, missionListWidget->missionStagesMap[missionCode].first);
+			populatePage(dispatchPage, missionListWidget->missionStagesMap[missionCode].second);
 		});
 }
 
@@ -72,10 +41,29 @@ void StagesEditorWidget::clearLayout(QLayout *layout) {
 		while(layout->count() > 0) {
 			QLayoutItem *item = layout->takeAt(0);
 			QWidget *widget = item->widget();
-			if(widget) {
-				delete widget;
-			}
+			delete widget;
 			delete item;
 		}
+	}
+}
+
+void StagesEditorWidget::populatePage(QWidget *page, const QVector<QString> &stages) {
+	int stageIndex = 1;
+
+	foreach(const QString &stage, stages) {
+		auto *textField = new QTextEdit(page);
+		textField->setPlainText(stage);
+
+		new SyntaxHighlighter(textField->document());
+
+		auto *layout = new QVBoxLayout();
+		layout->addWidget(textField);
+
+		auto *box = new QGroupBox("Stage " + QString::number(stageIndex));
+		box->setLayout(layout);
+		box->setFlat(true);
+
+		page->layout()->addWidget(box);
+		stageIndex++;
 	}
 }

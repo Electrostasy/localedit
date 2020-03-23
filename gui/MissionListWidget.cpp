@@ -15,12 +15,14 @@ MissionListWidget::MissionListWidget(QWidget *parent): QWidget(parent) {
 	// Connect search to list
 	connect(searchBar, &QLineEdit::textChanged, this, [=](const QString &filter) {
 		for(int i = 0; i < missionList->count(); ++i) {
-			auto *item = missionList->item(i);
+			QListWidgetItem *item = missionList->item(i);
 
 			// Show item if match, otherwise hide
 			item->setHidden(!item->text().contains(filter, Qt::CaseInsensitive));
 		}
 	});
+
+	// connect(missionList, &QListWidget::itemSelectionChanged, this, &MissionListWidget::missionSelected);
 
 	// Add widgets to a vertical layout
 	auto *missionsLayout = new QVBoxLayout(this);
@@ -28,12 +30,13 @@ MissionListWidget::MissionListWidget(QWidget *parent): QWidget(parent) {
 	missionsLayout->addWidget(missionList);
 }
 
-double MissionListWidget::addMissionToList(const QString &missionCode, const QString &missionName) const {
+int MissionListWidget::addMissionToList(const QString &missionCode, const QString &missionName) const {
 	auto *item = new QListWidgetItem(missionList);
 	item->setData(Qt::UserRole, missionCode);
 	item->setText(missionName);
 
-	return QFontMetrics(item->font()).horizontalAdvance(missionName) / 1.8;
+	return static_cast<int>(qFloor(QFontMetrics(item->font()).horizontalAdvance(missionName) +
+								   this->style()->pixelMetric(QStyle::PM_SliderThickness) * 3.5));
 }
 
 // Accept for drag and drop only physical (local) files that have a path on disk
@@ -67,7 +70,7 @@ void MissionListWidget::dropEvent(QDropEvent *event) {
 					missionMap[matchMissionCode.captured(0)] = matchMissionName.captured(0);
 					double width = addMissionToList(matchMissionCode.captured(0), matchMissionName.captured(0));
 					if(width > this->minimumWidth()) {
-						this->setMinimumWidth(qFloor(width));
+						this->setMinimumWidth(width);
 					}
 				}
 			}
@@ -91,3 +94,10 @@ void MissionListWidget::dropEvent(QDropEvent *event) {
 		file.close();
 	}
 }
+/*
+
+void MissionListWidget::missionSelected(QListWidgetItem *selectedItem) {
+	// selectedItem->setData()
+}
+
+ */

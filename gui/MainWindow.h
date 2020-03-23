@@ -4,6 +4,7 @@
 #include <QtWidgets>
 
 #include "MissionListWidget.h"
+#include "PreviewBoxWidget.h"
 #include "StagesEditorWidget.h"
 
 class MainWindow: public QMainWindow {
@@ -14,6 +15,7 @@ class MainWindow: public QMainWindow {
 
 	private:
 	MissionListWidget *missionListWidget;
+	// PreviewBoxWidget *previewBoxWidget;
 	StagesEditorWidget *stagesEditorWidget;
 	QStatusBar *statusBarWidget;
 };

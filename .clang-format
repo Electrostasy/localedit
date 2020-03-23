@@ -1,5 +1,5 @@
 AccessModifierOffset: 0
-AlignAfterOpenBracket: Align
+AlignAfterOpenBracket: DontAlign
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
 AlignConsecutiveMacros: false
