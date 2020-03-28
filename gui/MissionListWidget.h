@@ -7,28 +7,52 @@
 #include <QtCore/QTextStream>
 #include <QtEvents>
 #include <QtMath>
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QListWidget>
+#include <QLineEdit>
+#include <QTreeWidget>
 
 class MissionListWidget: public QWidget {
 	Q_OBJECT
 
 	public:
-	// Map of mission codes to mission names
-	QMap<QString, QString> missionMap;
-	// Map of mission codes to sides of stages that have mission text
-	QMap<QString, QPair<QVector<QString>, QVector<QString>>> missionStagesMap;
+	enum Metadata {
+		MissionCode = 0x00FF,
+		MissionModified = 0x00FE
+	};
+
+	struct Mission {
+		QString name;
+		QString code;
+		QVector<QString> stagesOwner;
+		QVector<QString> stagesDispatch;
+		bool hasPendingChanges = false;
+	};
+	/* We use a map of mission codes to missions, because we build missions from two different files that contain
+	 * different mission information.
+	 * - In MissionTemplates.* files, we assign the mission its code and name.
+	 * - In TaskObjectives.* files, we assign the mission its stages for Owner and Dispatch sides.
+	 * QMap was chosen for lookup speed when doing a 2nd pass to add mission information.
+	 * TODO: Mission map needs a clearer data structure
+	 */
+	QMap<QString, Mission> missionMap;
 
 	QLineEdit *searchBar;
-	QListWidget *missionList;
+	QTreeWidget *missionList;
 
 	explicit MissionListWidget(QWidget *parent = nullptr);
-	[[nodiscard]] int addMissionToList(const QString &missionCode, const QString &missionName) const;
+	void parseFile(QFile *file);
+	void parseMissionTemplates(Mission &mission, const QString &line);
+	void parseTaskObjectives(Mission &mission, const QString &line);
+	void addMissionToList(Mission &mission) const;
 
-	// signals:
-	// void missionSelected(QListWidgetItem *selectedItem);
+	signals:
+	// void missionSelected(QTreeWidgetItem *selectedMission);
+
 
 	private:
+	QRegularExpression rxMissionCodeTemplates;
+	QRegularExpression rxMissionCodeObjectives;
+	QRegularExpression rxRemainder;
+
 	void dragEnterEvent(QDragEnterEvent *event) override;
 	void dropEvent(QDropEvent *event) override;
 };

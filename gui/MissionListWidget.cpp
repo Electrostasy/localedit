@@ -2,41 +2,37 @@
 #include <QtWidgets/QLabel>
 
 MissionListWidget::MissionListWidget(QWidget *parent): QWidget(parent) {
+	// Initialize regex patterns for mission text parsing
+	rxMissionCodeTemplates.setPattern("(?<=MissionTemplates_).+?(?=_MissionTitle)");
+	rxMissionCodeObjectives.setPattern("(?<=TaskObjectives_).+?(?=_Stage)");
+	rxRemainder.setPattern("(?<=\\=).*");
+
 	this->setAcceptDrops(true);
 
 	searchBar = new QLineEdit();
 	searchBar->setPlaceholderText("Search missions...");
 
-	// Create a list to search through
-	missionList = new QListWidget();
+	missionList = new QTreeWidget();
+	missionList->setColumnCount(2);
+	missionList->setColumnWidth(1, QFontMetrics(missionList->font()).horizontalAdvance("*"));
+	missionList->setHeaderHidden(true);
 	missionList->setSelectionBehavior(QAbstractItemView::SelectItems);
 	missionList->setSelectionMode(QAbstractItemView::SingleSelection);
 
-	// Connect search to list
+	// connect(missionList, &QTreeWidget::currentItemChanged, this, &MissionListWidget::missionSelected);
 	connect(searchBar, &QLineEdit::textChanged, this, [=](const QString &filter) {
-		for(int i = 0; i < missionList->count(); ++i) {
-			QListWidgetItem *item = missionList->item(i);
+		QTreeWidgetItemIterator itemIterator(missionList);
 
-			// Show item if match, otherwise hide
-			item->setHidden(!item->text().contains(filter, Qt::CaseInsensitive));
+		while(*itemIterator) {
+			(*itemIterator)->setHidden(!(*itemIterator)->text(0).contains(filter, Qt::CaseInsensitive));
+
+			itemIterator++;
 		}
 	});
 
-	// connect(missionList, &QListWidget::itemSelectionChanged, this, &MissionListWidget::missionSelected);
-
-	// Add widgets to a vertical layout
 	auto *missionsLayout = new QVBoxLayout(this);
 	missionsLayout->addWidget(searchBar);
 	missionsLayout->addWidget(missionList);
-}
-
-int MissionListWidget::addMissionToList(const QString &missionCode, const QString &missionName) const {
-	auto *item = new QListWidgetItem(missionList);
-	item->setData(Qt::UserRole, missionCode);
-	item->setText(missionName);
-
-	return static_cast<int>(qFloor(QFontMetrics(item->font()).horizontalAdvance(missionName) +
-								   this->style()->pixelMetric(QStyle::PM_SliderThickness) * 3.5));
 }
 
 // Accept for drag and drop only physical (local) files that have a path on disk
@@ -48,56 +44,75 @@ void MissionListWidget::dragEnterEvent(QDragEnterEvent *event) {
 
 // Drop multiple files onto the window and load them from path as read only
 void MissionListWidget::dropEvent(QDropEvent *event) {
-	QRegularExpression rxMissionCodeTemplates("(?<=MissionTemplates_).+?(?=_MissionTitle)");
-	QRegularExpression rxMissionCodeObjectives("(?<=TaskObjectives_).+?(?=_Stage)");
-	QRegularExpression rxRemainder("(?<=\\=).*");
 	foreach(const QUrl &url, event->mimeData()->urls()) {
 		QFile file(url.toLocalFile());
 		if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 			return;
 		}
 
-		QTextStream namesStream(&file);
-		while(!namesStream.atEnd()) {
-			QString line = namesStream.readLine();
-
-			// If file is MissionTemplates (mission code, mission name)
-			if(line.startsWith("MissionTemplates_")) {
-				QRegularExpressionMatch matchMissionCode = rxMissionCodeTemplates.match(line);
-				QRegularExpressionMatch matchMissionName = rxRemainder.match(line);
-
-				if(matchMissionCode.hasMatch() && matchMissionName.hasMatch()) {
-					missionMap[matchMissionCode.captured(0)] = matchMissionName.captured(0);
-					double width = addMissionToList(matchMissionCode.captured(0), matchMissionName.captured(0));
-					if(width > this->minimumWidth()) {
-						this->setMinimumWidth(width);
-					}
-				}
-			}
-
-			// If file is TaskObjectives (mission code, mission stage and description)
-			if(line.startsWith("TaskObjectives_")) {
-				QRegularExpressionMatch matchMissionCode = rxMissionCodeObjectives.match(line);
-				QRegularExpressionMatch matchMissionText = rxRemainder.match(line);
-
-				if(matchMissionCode.hasMatch() && matchMissionText.hasMatch()) {
-					if(line.contains("_OwnerBrief=")) {
-						missionStagesMap[matchMissionCode.captured(0)].first.push_back(matchMissionText.captured(0));
-					}
-
-					if(line.contains("_DispatchBrief=")) {
-						missionStagesMap[matchMissionCode.captured(0)].second.push_back(matchMissionText.captured(0));
-					}
-				}
-			}
-		}
+		parseFile(&file);
 		file.close();
 	}
 }
-/*
 
-void MissionListWidget::missionSelected(QListWidgetItem *selectedItem) {
-	// selectedItem->setData()
+void MissionListWidget::parseFile(QFile *file) {
+	QTextStream fileContent(file);
+	while(!fileContent.atEnd()) {
+		QString line = fileContent.readLine();
+		if(line.startsWith(';')) {
+			// Skip lines with comments
+			continue;
+		}
+
+		Mission mission;
+
+		if(line.startsWith("MissionTemplates_")) {
+			parseMissionTemplates(mission, line);
+		}
+
+		if(line.startsWith("TaskObjectives_")) {
+			parseTaskObjectives(mission, line);
+		}
+
+		break;
+	}
 }
 
- */
+void MissionListWidget::parseMissionTemplates(Mission &mission, const QString &line) {
+	QRegularExpressionMatch matchMissionCode = rxMissionCodeTemplates.match(line);
+	QRegularExpressionMatch matchMissionName = rxRemainder.match(line);
+
+	if(matchMissionCode.hasMatch() && matchMissionName.hasMatch()) {
+		mission.code = matchMissionCode.captured(0);
+		mission.name = matchMissionName.captured(0);
+		missionMap[mission.code] = mission;
+
+		addMissionToList(mission);
+	}
+}
+// int MissionListWidget::addMissionToList(Mission &mission) const {
+void MissionListWidget::addMissionToList(Mission &mission) const {
+	auto *item = new QTreeWidgetItem(missionList);
+	item->setData(0, Metadata::MissionCode, mission.code);
+	item->setText(0, mission.name);
+	item->setText(1, "*");
+
+	if(missionList->columnWidth(0) < QFontMetrics(item->font(0)).horizontalAdvance(mission.name)) {
+		missionList->resizeColumnToContents(0);
+	}
+}
+
+void MissionListWidget::parseTaskObjectives(Mission &mission, const QString &line) {
+	QRegularExpressionMatch matchMissionCode = rxMissionCodeObjectives.match(line);
+	QRegularExpressionMatch matchMissionText = rxRemainder.match(line);
+
+	if(matchMissionCode.hasMatch() && matchMissionText.hasMatch()) {
+		if(line.contains("_OwnerBrief=")) {
+			missionMap[matchMissionCode.captured(0)].stagesOwner.push_back(matchMissionText.captured(0));
+		}
+
+		if(line.contains("_DispatchBrief=")) {
+			missionMap[matchMissionCode.captured(0)].stagesDispatch.push_back(matchMissionText.captured(0));
+		}
+	}
+}

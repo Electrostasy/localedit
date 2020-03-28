@@ -16,7 +16,15 @@ class StagesEditorWidget: public QWidget {
 	QWidget *ownerPage;
 	QWidget *dispatchPage;
 
+	QVector<QTextEdit*> shownStages;
+
 	private:
+	MissionListWidget *associatedListWidget;
+
 	static void clearLayout(QLayout *layout);
-	static void populatePage(QWidget *page, const QVector<QString>& stages);
+	void showMissionStages(QTreeWidgetItem *currentItem);
+	void buildMutableStages(MissionListWidget::Mission& mutableMission, const bool& forOwner);
+
+	signals:
+	void stageFocused(const int& index);
 };

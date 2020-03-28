@@ -9,7 +9,7 @@ PreviewBoxWidget::PreviewBoxWidget(QWidget *parent): QWidget(parent) {
 	auto headerLayout = new QHBoxLayout(header);
 
 	auto icon = new QLabel();
-	QPixmap pixmap(":/images/mission_exclamation_mark.png");
+	QPixmap pixmap(":/resources/mission_exclamation_mark");
 	icon->setPixmap(pixmap);
 	icon->setMask(pixmap.mask());
 	icon->setMargin(0);
@@ -61,7 +61,6 @@ PreviewBoxWidget::PreviewBoxWidget(QWidget *parent): QWidget(parent) {
 	// Limit line count in missionText (albeit crudely)
 	int lineLength = QFontMetrics(missionText->font()).horizontalAdvance(missionText->document()->toPlainText());
 	int lineCount = qCeil(lineLength / static_cast<double>(missionText->width()));
-	qDebug() << lineLength << lineLength / missionText->width() << lineCount;
 
 	this->setFixedHeight(qFloor(103 / ratio));
 	header->setFixedHeight(qFloor(18 / ratio));

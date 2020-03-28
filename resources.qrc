@@ -1,0 +1,7 @@
+<!DOCTYPE RCC>
+    <RCC version="1.0">
+    <qresource>
+        <file>resources/mission_exclamation_mark.png</file>
+        <!-- <file>resources/named_colours.txt</file> -->
+    </qresource>
+</RCC>
