@@ -3,28 +3,24 @@
 #include <QWidget>
 #include <QtWidgets>
 
-#include "MissionListWidget.h"
+#include "MissionList/MissionListWidget.h"
+#include "TabWidget/ExpandingTabWidget.h"
+#include "Utility/LayoutUtils.h"
 #include "SyntaxHighlighter.h"
 
 class StagesEditorWidget: public QWidget {
 	Q_OBJECT
 
 	public:
-	explicit StagesEditorWidget(MissionListWidget *missionListWidget);
+	explicit StagesEditorWidget(QWidget *parent = nullptr);
 
 	QTabWidget *tabWidget;
-	QWidget *ownerPage;
-	QWidget *dispatchPage;
+	QWidget *pageOwner;
+	QWidget *pageDispatch;
 
-	QVector<QTextEdit*> shownStages;
+	public slots:
+	void showStages(MissionListItem *currentItem);
 
 	private:
-	MissionListWidget *associatedListWidget;
-
-	static void clearLayout(QLayout *layout);
-	void showMissionStages(QTreeWidgetItem *currentItem);
-	void buildMutableStages(MissionListWidget::Mission& mutableMission, const bool& forOwner);
-
-	signals:
-	void stageFocused(const int& index);
+	static void initSidedStages(QWidget *page, const QVector<MissionListItem::Stage> &stages);
 };

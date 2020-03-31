@@ -14,12 +14,19 @@ set(SOURCE_FILES main.cpp
         gui/PreviewBoxWidget.h
         gui/SyntaxHighlighter.cpp
         gui/SyntaxHighlighter.h
-        gui/MissionListWidget.cpp
-        gui/MissionListWidget.h
+        gui/MissionList/MissionListItem.cpp
+        gui/MissionList/MissionListItem.h
+        gui/MissionList/MissionListWidget.cpp
+        gui/MissionList/MissionListWidget.h
         gui/StagesEditorWidget.cpp
         gui/StagesEditorWidget.h
-        resources.qrc
-        )
+        gui/TabWidget/ExpandingTabBar.cpp
+        gui/TabWidget/ExpandingTabBar.h
+        gui/TabWidget/ExpandingTabWidget.cpp
+        gui/TabWidget/ExpandingTabWidget.h
+        gui/Utility/LayoutUtils.cpp
+        gui/Utility/LayoutUtils.h
+        resources.qrc)
 
 # find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)

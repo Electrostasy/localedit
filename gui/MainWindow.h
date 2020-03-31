@@ -2,8 +2,8 @@
 
 #include <QtWidgets>
 
-#include "MissionListWidget.h"
-#include "PreviewBoxWidget.h"
+#include "MissionList/MissionListWidget.h"
+#include "MissionList/MissionListItem.h"
 #include "StagesEditorWidget.h"
 
 class MainWindow: public QMainWindow {
@@ -14,22 +14,23 @@ class MainWindow: public QMainWindow {
 	void updateTitle();
 
 	public slots:
+	void searchMissionList(const QString &filter);
 	void updateMissionInTitle(QTreeWidgetItem *selectedItem);
 
 	private:
 	const QString applicationName = "Localedit";
 	QString selectedMission;
 	bool hasPendingChanges = false;
-
-	MissionListWidget *missionListWidget;
-	PreviewBoxWidget *previewBoxWidget;
-	StagesEditorWidget *stagesEditorWidget;
-	QStatusBar *statusBarWidget;
-
-	void initMenusActions();
+	QLineEdit *search;
+	MissionListWidget *missions;
+	StagesEditorWidget *stages;
 
 	QMenu *fileMenu;
 	QAction *importAction;
+	QStatusBar *status;
+
+	static QString verifyAndTrim(const QString &fileName);
+	void initMenusActions();
 
 	private slots:
 	void importFiles();
