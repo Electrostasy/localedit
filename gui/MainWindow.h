@@ -4,7 +4,7 @@
 
 #include "MissionList/MissionListWidget.h"
 #include "MissionList/MissionListItem.h"
-#include "StagesEditorWidget.h"
+#include "StagesEditor/StagesEditorWidget.h"
 
 class MainWindow: public QMainWindow {
 	Q_OBJECT

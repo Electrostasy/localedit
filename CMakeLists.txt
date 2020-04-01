@@ -10,20 +10,20 @@ set(CMAKE_AUTORCC ON)
 set(SOURCE_FILES main.cpp
         gui/MainWindow.h
         gui/MainWindow.cpp
-        gui/PreviewBoxWidget.cpp
-        gui/PreviewBoxWidget.h
-        gui/SyntaxHighlighter.cpp
-        gui/SyntaxHighlighter.h
         gui/MissionList/MissionListItem.cpp
         gui/MissionList/MissionListItem.h
         gui/MissionList/MissionListWidget.cpp
         gui/MissionList/MissionListWidget.h
-        gui/StagesEditorWidget.cpp
-        gui/StagesEditorWidget.h
-        gui/TabWidget/ExpandingTabBar.cpp
-        gui/TabWidget/ExpandingTabBar.h
-        gui/TabWidget/ExpandingTabWidget.cpp
-        gui/TabWidget/ExpandingTabWidget.h
+        gui/PreviewBoxWidget.cpp
+        gui/PreviewBoxWidget.h
+        gui/StagesEditor/SyntaxHighlighter.cpp
+        gui/StagesEditor/SyntaxHighlighter.h
+        gui/StagesEditor/StagesEditorWidget.cpp
+        gui/StagesEditor/StagesEditorWidget.h
+        gui/StagesEditor/TabWidget/ExpandingTabBar.cpp
+        gui/StagesEditor/TabWidget/ExpandingTabBar.h
+        gui/StagesEditor/TabWidget/ExpandingTabWidget.cpp
+        gui/StagesEditor/TabWidget/ExpandingTabWidget.h
         gui/Utility/LayoutUtils.cpp
         gui/Utility/LayoutUtils.h
         resources.qrc)

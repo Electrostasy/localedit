@@ -3,9 +3,9 @@
 #include <QWidget>
 #include <QtWidgets>
 
-#include "MissionList/MissionListWidget.h"
+#include "../MissionList/MissionListWidget.h"
 #include "TabWidget/ExpandingTabWidget.h"
-#include "Utility/LayoutUtils.h"
+#include "../Utility/LayoutUtils.h"
 #include "SyntaxHighlighter.h"
 
 class StagesEditorWidget: public QWidget {

@@ -8,7 +8,7 @@ MainWindow::MainWindow() {
 	search = new QLineEdit();
 	search->setPlaceholderText("Search missions...");
 	missions = new MissionListWidget();
-	auto missionsLayout = new QVBoxLayout();
+	auto *missionsLayout = new QVBoxLayout();
 	missionsLayout->addWidget(search);
 	missionsLayout->addWidget(missions);
 
@@ -19,6 +19,8 @@ MainWindow::MainWindow() {
 	stages = new StagesEditorWidget();
 
 	connect(missions, &QListWidget::currentItemChanged, this, [=](QListWidgetItem *currentItem) {
+		// Upcasting from MissionListItem* to QListWidgetItem* on item addition to QListWidget*
+		// Downcasting from QListWidgetItem* to MissionListItem* here on currentItemChanged
 		stages->showStages(dynamic_cast<MissionListItem *>(currentItem));
 	});
 
@@ -38,7 +40,7 @@ MainWindow::MainWindow() {
 // Slots
 void MainWindow::searchMissionList(const QString &filter) {
 	for(int i = 0; i < missions->count(); ++i) {
-		auto mission = dynamic_cast<MissionListItem *>(missions->item(i));
+		auto *mission = dynamic_cast<MissionListItem *>(missions->item(i));
 
 		mission->setHidden(!mission->text().contains(filter, Qt::CaseInsensitive));
 	}
@@ -169,7 +171,7 @@ void MainWindow::importFiles() {
 
 		// Build list item widgets
 		for(auto &value: map.values()) {
-			auto item = new MissionListItem(value.name(), value.code(), value.ownerStages(), value.dispatchStages());
+			auto *item = new MissionListItem(value.name(), value.code(), value.ownerStages(), value.dispatchStages());
 			item->setText(value.name());
 
 			this->missions->addMission(item);
