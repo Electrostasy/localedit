@@ -1,8 +1,6 @@
 #include "MainWindow.h"
 
 MainWindow::MainWindow() {
-	auto *centralWidget = new QWidget();
-
 	search = new QLineEdit();
 	search->setPlaceholderText("Search missions...");
 	missions = new MissionListWidget();
@@ -21,21 +19,30 @@ MainWindow::MainWindow() {
 	auto *missionsLayout = new QVBoxLayout();
 	missionsLayout->addWidget(search);
 	missionsLayout->addWidget(missions);
+	missionsLayout->setMargin(0);
 
-	auto *centralLayout = new QGridLayout(centralWidget);
-	centralLayout->addLayout(missionsLayout, 0, 0, 0, 1);
-	centralLayout->addWidget(stages, 0, 1);
-	centralLayout->setColumnStretch(0, 2);
-	centralLayout->setColumnStretch(1, 5);
+	auto splitter = new QSplitter();
+	auto missionListContainer = new QWidget();
+	missionListContainer->setLayout(missionsLayout);
+	splitter->addWidget(missionListContainer);
+	splitter->addWidget(stages);
+	splitter->setSizes(QList{missionListContainer->width() / 3, splitter->width() - missionListContainer->width() / 3});
 
-	this->setCentralWidget(centralWidget);
+	auto splitterContainer = new QWidget();
+	splitterContainer->setLayout(new QHBoxLayout());
+	splitterContainer->layout()->addWidget(splitter);
+
+	this->setCentralWidget(splitterContainer);
 	status = new QStatusBar();
 	status->setSizeGripEnabled(false);
 	this->setStatusBar(status);
 	this->setWindowTitle(applicationName);
 
-	this->setMinimumWidth(missions->fontMetrics().averageCharWidth() * 80);
-	this->setMinimumHeight(missions->fontMetrics().ascent() * 32);
+	int minWidth = missions->fontMetrics().averageCharWidth() * 80;
+	int minHeight = missions->fontMetrics().ascent() * 32;
+	this->setMinimumWidth(minWidth);
+	this->setMinimumHeight(minHeight);
+	this->resize(minWidth, minHeight);
 
 	initMenusActions();
 }

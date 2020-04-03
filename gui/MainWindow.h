@@ -2,8 +2,8 @@
 
 #include <QtWidgets>
 
-#include "MissionList/MissionListWidget.h"
 #include "MissionList/MissionListItem.h"
+#include "MissionList/MissionListWidget.h"
 #include "StagesEditor/StagesEditorWidget.h"
 
 class MainWindow: public QMainWindow {
