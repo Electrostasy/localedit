@@ -15,7 +15,7 @@ class MainWindow: public QMainWindow {
 
 	public slots:
 	void searchMissionList(const QString &filter);
-	void updateMissionInTitle(QTreeWidgetItem *selectedItem);
+	void updateMissionInTitle(QListWidgetItem *selectedItem);
 
 	private:
 	const QString applicationName = "Localedit";
@@ -27,6 +27,7 @@ class MainWindow: public QMainWindow {
 
 	QMenu *fileMenu;
 	QAction *importAction;
+	// QAction *exportAction;
 	QStatusBar *status;
 
 	static QString verifyAndTrim(const QString &fileName);
@@ -34,4 +35,5 @@ class MainWindow: public QMainWindow {
 
 	private slots:
 	void importFiles();
+	// void exportFiles();
 };

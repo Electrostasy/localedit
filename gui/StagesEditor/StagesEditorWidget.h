@@ -7,6 +7,8 @@
 #include "TabWidget/ExpandingTabWidget.h"
 #include "../Utility/LayoutUtils.h"
 #include "SyntaxHighlighter.h"
+#include "ExpandedTextEdit.h"
+#include "FramedPage.h"
 
 class StagesEditorWidget: public QWidget {
 	Q_OBJECT
@@ -22,5 +24,5 @@ class StagesEditorWidget: public QWidget {
 	void showStages(MissionListItem *currentItem);
 
 	private:
-	static void initSidedStages(QWidget *page, const QVector<MissionListItem::Stage> &stages);
+	void initSidedStages(QWidget *page, const QVector<MissionListItem::Stage> &stages);
 };

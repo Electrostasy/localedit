@@ -26,7 +26,7 @@ set(SOURCE_FILES main.cpp
         gui/StagesEditor/TabWidget/ExpandingTabWidget.h
         gui/Utility/LayoutUtils.cpp
         gui/Utility/LayoutUtils.h
-        resources.qrc)
+        resources.qrc gui/StagesEditor/ExpandedTextEdit.cpp gui/StagesEditor/ExpandedTextEdit.h gui/fileDialog.cpp gui/fileDialog.h gui/StagesEditor/FramedPage.cpp gui/StagesEditor/FramedPage.h)
 
 # find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)

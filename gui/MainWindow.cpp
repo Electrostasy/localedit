@@ -2,20 +2,14 @@
 
 MainWindow::MainWindow() {
 	auto *centralWidget = new QWidget();
-	this->setCentralWidget(centralWidget);
 
-	// Initialize mission list
 	search = new QLineEdit();
 	search->setPlaceholderText("Search missions...");
 	missions = new MissionListWidget();
-	auto *missionsLayout = new QVBoxLayout();
-	missionsLayout->addWidget(search);
-	missionsLayout->addWidget(missions);
 
 	connect(search, &QLineEdit::textChanged, this, &MainWindow::searchMissionList);
-	// connect(missions, &QListWidget::currentItemChanged, this, &MainWindow::updateMissionInTitle);
+	connect(missions, &QListWidget::currentItemChanged, this, &MainWindow::updateMissionInTitle);
 
-	// Initialize stages editor
 	stages = new StagesEditorWidget();
 
 	connect(missions, &QListWidget::currentItemChanged, this, [=](QListWidgetItem *currentItem) {
@@ -24,15 +18,24 @@ MainWindow::MainWindow() {
 		stages->showStages(dynamic_cast<MissionListItem *>(currentItem));
 	});
 
+	auto *missionsLayout = new QVBoxLayout();
+	missionsLayout->addWidget(search);
+	missionsLayout->addWidget(missions);
+
 	auto *centralLayout = new QGridLayout(centralWidget);
 	centralLayout->addLayout(missionsLayout, 0, 0, 0, 1);
 	centralLayout->addWidget(stages, 0, 1);
 	centralLayout->setColumnStretch(0, 2);
 	centralLayout->setColumnStretch(1, 5);
 
+	this->setCentralWidget(centralWidget);
 	status = new QStatusBar();
+	status->setSizeGripEnabled(false);
 	this->setStatusBar(status);
 	this->setWindowTitle(applicationName);
+
+	this->setMinimumWidth(missions->fontMetrics().averageCharWidth() * 80);
+	this->setMinimumHeight(missions->fontMetrics().ascent() * 32);
 
 	initMenusActions();
 }
@@ -46,8 +49,8 @@ void MainWindow::searchMissionList(const QString &filter) {
 	}
 }
 
-void MainWindow::updateMissionInTitle(QTreeWidgetItem *selectedItem) {
-	this->selectedMission = selectedItem->text(0);
+void MainWindow::updateMissionInTitle(QListWidgetItem *selectedItem) {
+	this->selectedMission = selectedItem->text();
 	updateTitle();
 }
 
