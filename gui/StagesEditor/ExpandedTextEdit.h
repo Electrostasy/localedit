@@ -3,10 +3,12 @@
 #include <QWidget>
 #include <QtWidgets>
 
-class ExpandedTextEdit: public QTextEdit {
-public:
-	explicit ExpandedTextEdit(QWidget *parent = nullptr);
+#include "SyntaxHighlighter.h"
 
-public slots:
-	void showContextMenu(const QPoint& pos);
+class ExpandedTextEdit: public QPlainTextEdit {
+	public:
+	explicit ExpandedTextEdit(QTextDocument *document);
+
+	public slots:
+	void showContextMenu(const QPoint &pos);
 };

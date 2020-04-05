@@ -1,8 +1,13 @@
 #include "ExpandedTextEdit.h"
 
-ExpandedTextEdit::ExpandedTextEdit(QWidget *parent) {
-	this->setParent(parent);
+ExpandedTextEdit::ExpandedTextEdit(QTextDocument *document) {
+	this->setDocument(document);
 	this->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	// Attach a syntax highlighter
+	if(this->document()->findChild<QSyntaxHighlighter *>() == nullptr) {
+		new SyntaxHighlighter(this->document());
+	}
 
 	connect(this, &QWidget::customContextMenuRequested, this, &ExpandedTextEdit::showContextMenu);
 }
@@ -20,11 +25,11 @@ void ExpandedTextEdit::showContextMenu(const QPoint &pos) {
 	menu->addSeparator();
 	QAction *insertNewline = menu->addAction("Insert ↵");
 
-	connect(copy, &QAction::triggered, this, &QTextEdit::copy);
-	connect(paste, &QAction::triggered, this, &QTextEdit::paste);
-	connect(cut, &QAction::triggered, this, &QTextEdit::cut);
-	connect(redo, &QAction::triggered, this, &QTextEdit::redo);
-	connect(undo, &QAction::triggered, this, &QTextEdit::undo);
+	connect(copy, &QAction::triggered, this, &QPlainTextEdit::copy);
+	connect(paste, &QAction::triggered, this, &QPlainTextEdit::paste);
+	connect(cut, &QAction::triggered, this, &QPlainTextEdit::cut);
+	connect(redo, &QAction::triggered, this, &QPlainTextEdit::redo);
+	connect(undo, &QAction::triggered, this, &QPlainTextEdit::undo);
 	connect(insertNewline, &QAction::triggered, this, [=]() {
 		this->textCursor().insertText("↵");
 	});

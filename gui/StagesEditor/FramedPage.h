@@ -4,9 +4,8 @@
 #include <QtWidgets>
 
 class FramedPage: public QWidget {
-protected:
+	Q_OBJECT
+
+	protected:
 	void paintEvent(QPaintEvent *e) override;
-
 };
-
-

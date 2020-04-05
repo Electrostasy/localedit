@@ -1,17 +1,18 @@
 #pragma once
 
 #include <QListWidget>
+#include <QtCore>
+#include <QtGui/QTextDocument>
 
 class MissionListItem: public QListWidgetItem {
 	friend class MissionListWidget;
 
 	public:
 	struct Stage {
-		QString objectives;
-		bool hasOpp;
+		QTextDocument *objectives = nullptr;
+		bool hasOpp = false;
 
-		Stage();
-		Stage(const QString &objectives, const bool &hasOpp);
+		Stage(QTextDocument *objectives, const bool &hasOpp);
 	};
 
 	struct Mission {
@@ -27,7 +28,6 @@ class MissionListItem: public QListWidgetItem {
 	MissionListItem();
 	explicit MissionListItem(const Mission &mission);
 	MissionListItem(const QString &name, const QString &code);
-	MissionListItem(const QString &name, const QString &code, const QVector<Stage> &owner, const QVector<Stage> &dispatch);
 
 	void setIdentifiers(const QString &name, const QString &code);
 	void pushOwnerStage(const Stage &stage);

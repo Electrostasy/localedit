@@ -1,27 +1,23 @@
 #include "MissionListItem.h"
+#include <QtWidgets/QPlainTextDocumentLayout>
 
-MissionListItem::Stage::Stage() {
-	this->objectives = QString();
-	this->hasOpp = bool();
-}
-
-MissionListItem::Stage::Stage(const QString &objectives, const bool &hasOpp) {
+MissionListItem::Stage::Stage(QTextDocument *objectives, const bool &hasOpp) {
 	this->objectives = objectives;
+	// Need to change the doc layout because if we don't QPlainTextEdit::setDocument starts crying that
+	// Document set does not support QPlainTextDocumentLayout
+	auto *documentLayout = new QPlainTextDocumentLayout(objectives);
+	this->objectives->setDocumentLayout(documentLayout);
+	// Adding text to the QTextDocument adds it to the undo/redo stacks
+	this->objectives->clearUndoRedoStacks();
 	this->hasOpp = hasOpp;
 }
 
 MissionListItem::MissionListItem() {
-	Mission();
+	this->mission = Mission();
 }
 
 MissionListItem::MissionListItem(const QString &name, const QString &code) {
 	this->mission = Mission(name, code);
-}
-
-MissionListItem::MissionListItem(const QString &name, const QString &code, const QVector<Stage> &owner, const QVector<Stage> &dispatch) {
-	this->mission = Mission(name, code);
-	this->mission.owner = owner;
-	this->mission.dispatch = dispatch;
 }
 
 void MissionListItem::setIdentifiers(const QString &name, const QString &code) {
@@ -63,7 +59,7 @@ QString MissionListItem::code() {
 	return this->mission.code;
 }
 
-MissionListItem::MissionListItem(const MissionListItem::Mission& mission) {
+MissionListItem::MissionListItem(const MissionListItem::Mission &mission) {
 	this->mission = mission;
 }
 

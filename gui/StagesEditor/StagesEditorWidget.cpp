@@ -23,14 +23,10 @@ StagesEditorWidget::StagesEditorWidget(QWidget *parent): QWidget(parent) {
 
 	layout->addWidget(tabWidget);
 	layout->setMargin(0);
+	this->setMinimumWidth(this->fontMetrics().averageCharWidth() * 80);
 }
 
-void StagesEditorWidget::showStages(MissionListItem *currentItem) {
-	initSidedStages(pageOwner, currentItem->ownerStages());
-	initSidedStages(pageDispatch, currentItem->dispatchStages());
-}
-
-void StagesEditorWidget::initSidedStages(QWidget *page, const QVector<MissionListItem::Stage> &stages) {
+void StagesEditorWidget::buildStages(QWidget *page, const QVector<MissionListItem::Stage> &stages, MissionListItem *currentItem) {
 	if(page->layout()->count() > 0) {
 		LayoutUtils::clearLayout(page->layout());
 	}
@@ -53,32 +49,40 @@ void StagesEditorWidget::initSidedStages(QWidget *page, const QVector<MissionLis
 
 	// Build stages UI
 	int stageIndex = 1;
-	foreach(const MissionListItem::Stage &stage, stages) {
+	for(const auto &stage: stages) {
+		// Stages with Opp are duplicates so we don't need to show them
 		if(stage.hasOpp) {
 			continue;
 		}
-		auto *layout = new QVBoxLayout();
 
 		auto *box = new QGroupBox();
+		auto *boxLayout = new QVBoxLayout();
 		box->setTitle("Stage " + QString::number(stageIndex));
 		box->setFlat(true);
+		box->setLayout(boxLayout);
+
 		scrollableLayout->addWidget(box);
 
-		box->setLayout(layout);
+		auto *textField = new ExpandedTextEdit(stage.objectives);
+		boxLayout->addWidget(textField, 0);
 
-		auto *textField = new ExpandedTextEdit(page);
-		new SyntaxHighlighter(textField->document());
-		textField->setPlainText(stage.objectives);
+		// If there are undo steps remaining, that means the mission currently being edited needs to be marked as
+		// having been modified, and if not - cleared of being marked modified
+		connect(textField, &QPlainTextEdit::textChanged, this, [=]() {
+			if(textField->document()->availableUndoSteps() > 0) {
+				currentItem->setData(Qt::ItemDataRole::DecorationRole, QIcon(":/resources/pending_changes"));
+			} else {
+				currentItem->setData(Qt::ItemDataRole::DecorationRole, QIcon());
+			}
+		});
 
+		// TODO: this doesn't correctly set a 3 line height
 		QFontMetrics fm = QFontMetrics(textField->font());
-		int fieldHeight = fm.lineSpacing() * 2 + fm.height() * 3;
-		textField->setFixedHeight(fieldHeight);
+		textField->setFixedHeight(fm.lineSpacing() * 2 + fm.height() * 3);
 
-		layout->addWidget(textField, 0);
 		stageIndex++;
 	}
 
-	// scrollableLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
 	scrollableLayout->addStretch(9);
 	page->layout()->addWidget(scrollArea);
 }

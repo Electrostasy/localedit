@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QWidget>
 #include <QLayout>
+#include <QWidget>
 
 class LayoutUtils {
 	public:

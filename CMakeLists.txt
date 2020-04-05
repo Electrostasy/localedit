@@ -7,30 +7,34 @@ set(CMAKE_AUTOMOC ON)
 # set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-set(SOURCE_FILES main.cpp
-        gui/MainWindow.h
+set(SOURCE_FILES
+        main.cpp
         gui/MainWindow.cpp
+        gui/MainWindow.h
         gui/MissionList/MissionListItem.cpp
-        gui/MissionList/MissionListItem.h
         gui/MissionList/MissionListWidget.cpp
         gui/MissionList/MissionListWidget.h
         gui/PreviewBoxWidget.cpp
         gui/PreviewBoxWidget.h
-        gui/StagesEditor/SyntaxHighlighter.cpp
-        gui/StagesEditor/SyntaxHighlighter.h
         gui/StagesEditor/StagesEditorWidget.cpp
         gui/StagesEditor/StagesEditorWidget.h
+        gui/StagesEditor/ExpandedTextEdit.cpp
+        gui/StagesEditor/ExpandedTextEdit.h
+        gui/StagesEditor/FramedPage.cpp
+        gui/StagesEditor/FramedPage.h
+        gui/StagesEditor/SyntaxHighlighter.cpp
+        gui/StagesEditor/SyntaxHighlighter.h
         gui/StagesEditor/TabWidget/ExpandingTabBar.cpp
         gui/StagesEditor/TabWidget/ExpandingTabBar.h
         gui/StagesEditor/TabWidget/ExpandingTabWidget.cpp
         gui/StagesEditor/TabWidget/ExpandingTabWidget.h
         gui/Utility/LayoutUtils.cpp
         gui/Utility/LayoutUtils.h
-        resources.qrc gui/StagesEditor/ExpandedTextEdit.cpp gui/StagesEditor/ExpandedTextEdit.h gui/fileDialog.cpp gui/fileDialog.h gui/StagesEditor/FramedPage.cpp gui/StagesEditor/FramedPage.h)
+        resources.qrc)
 
-# find_package(Qt5Core REQUIRED)
+find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
-# find_package(Qt5Gui REQUIRED)
+find_package(Qt5Gui REQUIRED)
 
 add_executable(apb_config ${SOURCE_FILES})
 

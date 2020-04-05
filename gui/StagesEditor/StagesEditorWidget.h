@@ -4,11 +4,10 @@
 #include <QtWidgets>
 
 #include "../MissionList/MissionListWidget.h"
-#include "TabWidget/ExpandingTabWidget.h"
 #include "../Utility/LayoutUtils.h"
-#include "SyntaxHighlighter.h"
 #include "ExpandedTextEdit.h"
 #include "FramedPage.h"
+#include "TabWidget/ExpandingTabWidget.h"
 
 class StagesEditorWidget: public QWidget {
 	Q_OBJECT
@@ -20,9 +19,5 @@ class StagesEditorWidget: public QWidget {
 	QWidget *pageOwner;
 	QWidget *pageDispatch;
 
-	public slots:
-	void showStages(MissionListItem *currentItem);
-
-	private:
-	void initSidedStages(QWidget *page, const QVector<MissionListItem::Stage> &stages);
+	void buildStages(QWidget *page, const QVector<MissionListItem::Stage> &stages, MissionListItem *currentItem);
 };

@@ -1,19 +1,26 @@
 #include "MainWindow.h"
 
 MainWindow::MainWindow() {
+	QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF8"));
+
 	search = new QLineEdit();
 	search->setPlaceholderText("Search missions...");
 	missions = new MissionListWidget();
 
 	connect(search, &QLineEdit::textChanged, this, &MainWindow::searchMissionList);
-	connect(missions, &QListWidget::currentItemChanged, this, &MainWindow::updateMissionInTitle);
+	connect(missions, &QListWidget::currentItemChanged, this, &MainWindow::updateTitle);
 
 	stages = new StagesEditorWidget();
 
 	connect(missions, &QListWidget::currentItemChanged, this, [=](QListWidgetItem *currentItem) {
 		// Upcasting from MissionListItem* to QListWidgetItem* on item addition to QListWidget*
 		// Downcasting from QListWidgetItem* to MissionListItem* here on currentItemChanged
-		stages->showStages(dynamic_cast<MissionListItem *>(currentItem));
+		auto *item = dynamic_cast<MissionListItem *>(currentItem);
+		// If item is nullptr, importing more files with open stages will crash
+		if(item != nullptr) {
+			stages->buildStages(stages->pageOwner, item->ownerStages(), item);
+			stages->buildStages(stages->pageDispatch, item->dispatchStages(), item);
+		}
 	});
 
 	auto *missionsLayout = new QVBoxLayout();
@@ -26,7 +33,8 @@ MainWindow::MainWindow() {
 	missionListContainer->setLayout(missionsLayout);
 	splitter->addWidget(missionListContainer);
 	splitter->addWidget(stages);
-	splitter->setSizes(QList{missionListContainer->width() / 3, splitter->width() - missionListContainer->width() / 3});
+	splitter->setChildrenCollapsible(false);
+	splitter->setSizes(QList{ missionListContainer->width() / 3, splitter->width() - missionListContainer->width() / 3 });
 
 	auto splitterContainer = new QWidget();
 	splitterContainer->setLayout(new QHBoxLayout());
@@ -38,16 +46,9 @@ MainWindow::MainWindow() {
 	this->setStatusBar(status);
 	this->setWindowTitle(applicationName);
 
-	int minWidth = missions->fontMetrics().averageCharWidth() * 80;
-	int minHeight = missions->fontMetrics().ascent() * 32;
-	this->setMinimumWidth(minWidth);
-	this->setMinimumHeight(minHeight);
-	this->resize(minWidth, minHeight);
-
 	initMenusActions();
 }
 
-// Slots
 void MainWindow::searchMissionList(const QString &filter) {
 	for(int i = 0; i < missions->count(); ++i) {
 		auto *mission = dynamic_cast<MissionListItem *>(missions->item(i));
@@ -56,45 +57,79 @@ void MainWindow::searchMissionList(const QString &filter) {
 	}
 }
 
-void MainWindow::updateMissionInTitle(QListWidgetItem *selectedItem) {
-	this->selectedMission = selectedItem->text();
-	updateTitle();
-}
-
 void MainWindow::updateTitle() {
-	// TODO: Touching how title is created apparently breaks loading of missions
-	QString title = applicationName + " - " + selectedMission;
+	QString title = applicationName;
 
-	// If a mission has pending changes, append star
-	if(hasPendingChanges && !title.endsWith("(*)")) {
-		title += " (*)";
+	auto *currentItem = dynamic_cast<MissionListItem *>(missions->currentItem());
+	if(currentItem != nullptr) {
+		title += " - " + currentItem->name();
 	}
 
 	this->setWindowTitle(title);
 }
 
 void MainWindow::initMenusActions() {
-	// File menu actions
-	fileMenu = menuBar()->addMenu("File");
 	importAction = new QAction("Import");
-	importAction->setStatusTip("Import localization files from APB Reloaded");
+	importAction->setStatusTip("Select and import localization files to edit");
 	connect(importAction, &QAction::triggered, this, &MainWindow::importFiles);
-	fileMenu->addAction(importAction);
+	this->menuBar()->addAction(importAction);
+
+	exportAction = new QAction("Export");
+	exportAction->setEnabled(false);
+	exportAction->setStatusTip("Export localization files to selected folder");
+	connect(exportAction, &QAction::triggered, this, &MainWindow::exportFiles);
+	this->menuBar()->addAction(exportAction);
 }
 
 void MainWindow::importFiles() {
+	if(missions->count() != 0) {
+		for(int i = 0; i < missions->count(); ++i) {
+			auto *item = missions->item(0);
+			if(!item->data(Qt::ItemDataRole::DecorationRole).value<QIcon>().isNull()) {
+				QMessageBox unsavedChangesBox;
+				unsavedChangesBox.setWindowTitle(this->applicationName);
+				unsavedChangesBox.setText("You have unsaved changes.");
+				unsavedChangesBox.setStandardButtons(QMessageBox::Save | QMessageBox::Ignore | QMessageBox::Cancel);
+				unsavedChangesBox.setDefaultButton(QMessageBox::Cancel);
+				int ret = unsavedChangesBox.exec();
+				switch(ret) {
+					case QMessageBox::Save:
+						// Save was clicked
+						this->exportFiles();
+						return;
+					case QMessageBox::Ignore:
+						// Ignore was clicked
+						this->openImportFilesDialog();
+						return;
+					case QMessageBox::Cancel:
+						// Cancel was clicked
+						return;
+					default:
+						// should never be reached
+						break;
+				}
+			}
+		}
+	}
+	this->openImportFilesDialog();
+}
+
+void MainWindow::openImportFilesDialog() {
 	QFileDialog dialog(this);
 	dialog.setFileMode(QFileDialog::FileMode::ExistingFiles);
 	dialog.setNameFilter("Localization Files (*.INT *.GER *.ITA *.RUS *.SPA *.FRA *.BRA)");
 	dialog.setViewMode(QFileDialog::ViewMode::List);
 
 	if(dialog.exec()) {
-		missions->clear();
+		if(missions->count() > 0) {
+			missions->clear();
+		}
 
 		QFile missionTemplates;
 		QFile taskObjectives;
 		QStringList fileNames = dialog.selectedFiles();
-		foreach(const QString &fileName, fileNames) {
+		for(auto const &fileName: fileNames) {
+			// Check if required files are contained in fileNames and trim the path and extension
 			const QString trimmed = verifyAndTrim(fileName);
 
 			if(trimmed == "MissionTemplates") {
@@ -115,8 +150,7 @@ void MainWindow::importFiles() {
 		QRegularExpression IDENTIFIERS("MissionTemplates_(?<code>[A-Za-z0-9_]+)_MissionTitle=(?<title>.*)");
 		QRegularExpression STAGE_REGEX("TaskObjectives_(?<code>[A-Za-z0-9_]+)_(?:Stage\\d{2}_)(?<special>Opp)?_?(?<side>\\w+)=(?<text>.*)");
 
-		// TODO: Rework so codes are mapped to Missions instead of Widgets
-		QMap<QString, MissionListItem> map;
+		QMap<QString, MissionListItem *> map;
 
 		QTextStream streamTitles(&missionTemplates);
 		QTextStream streamStages(&taskObjectives);
@@ -132,11 +166,16 @@ void MainWindow::importFiles() {
 			if(match.hasMatch()) {
 				code = match.captured("code");
 
-				map[code].setIdentifiers(match.captured("title"), code);
+				// If the mission isn't initialized yet, initialize it
+				if(map[code] == nullptr) {
+					map[code] = new MissionListItem();
+				}
+				map[code]->setIdentifiers(match.captured("title"), code);
 			}
 
 			// Read stages for given code
 			while(streamStages.readLineInto(&line)) {
+				// Unlikely to encounter comments, TODO: maybe remove if statement
 				if(line.startsWith(';')) {
 					continue;
 				}
@@ -144,32 +183,35 @@ void MainWindow::importFiles() {
 				match = STAGE_REGEX.match(line);
 				if(match.hasMatch()) {
 					QString side = match.captured("side");
-					/**
-					 * Some missions have an "Opp" tag on some stages, which by default means there's an alternate
-					 * version that we can go to for objective text if our stage tagged "Opp" has none.
-					 */
-					MissionListItem::Stage stage(match.captured("text"), !match.captured("special").isEmpty());
-
+					// Some missions have an "Opp" tag on some stages, we flag it as appropriate to avoid displaying it
+					// and then during exporting we copy the data from the equivalent non-Opp stage to it
+					MissionListItem::Stage stage(
+						new QTextDocument(match.captured("text")), !match.captured("special").isEmpty());
 					if(match.captured("code") == code) {
-						// Stages belong to mission of code
+						// Ensure we are reading the stages for the mission whose name and code we got earlier
 						if(side == "OwnerBrief") {
-							map[code].pushOwnerStage(stage);
+							map[code]->pushOwnerStage(stage);
 						}
 
 						if(side == "DispatchBrief") {
-							map[code].pushDispatchStage(stage);
+							map[code]->pushDispatchStage(stage);
 						}
 					} else {
-						// It's a new mission
+						// In the case we overshoot and start reading data of the next mission, just initialize it
+						// and save whatever stage we got from it. On next iteration we continue where we left off on
+						if(map[match.captured("code")] == nullptr) {
+							map[match.captured("code")] = new MissionListItem();
+						}
+
 						if(side == "OwnerBrief") {
-							map[match.captured("code")].pushOwnerStage(stage);
+							map[match.captured("code")]->pushOwnerStage(stage);
 						}
 
 						if(side == "DispatchBrief") {
-							map[match.captured("code")].pushDispatchStage(stage);
+							map[match.captured("code")]->pushDispatchStage(stage);
 						}
 
-						// Break out to get new mission title for new code
+						// End this loop since we overshot
 						break;
 					}
 				}
@@ -180,13 +222,93 @@ void MainWindow::importFiles() {
 		taskObjectives.close();
 
 		// Build list item widgets
-		for(auto &value: map.values()) {
-			auto *item = new MissionListItem(value.name(), value.code(), value.ownerStages(), value.dispatchStages());
-			item->setText(value.name());
+		for(auto *mission: map.values()) {
+			this->missions->addMission(mission);
+		}
 
-			this->missions->addMission(item);
+		this->missions->item(0)->setSelected(true);
+		this->missions->currentItemChanged(missions->item(0), nullptr);
+		this->exportAction->setEnabled(true);
+	}
+}
+
+void MainWindow::exportFiles() {
+	QFileDialog dialog(this);
+	dialog.setFileMode(QFileDialog::FileMode::Directory);
+	dialog.setViewMode(QFileDialog::ViewMode::List);
+	dialog.setOption(QFileDialog::Option::ShowDirsOnly);
+
+	if(dialog.exec()) {
+		QStringList directories = dialog.selectedFiles();
+		if(directories.size() == 1) {
+			const QString &url = directories.at(0);
+
+			QFile missionTemplates(url + "/MissionTemplates.INT");
+			if(!missionTemplates.open(QIODevice::WriteOnly | QIODevice::Text)) {
+				return;
+			}
+			QTextStream output(&missionTemplates);
+			output.setCodec(QTextCodec::codecForName("UTF-8"));
+
+			writeInfoHeader(output);
+
+			output << "[MissionTemplates]\n";
+			for(int i = 0; i < missions->count(); ++i) {
+				auto *item = dynamic_cast<MissionListItem *>(missions->item(i));
+				output << "MissionTemplates_" + item->code() + "_MissionTitle=" + item->name() + "\n";
+			}
+			missionTemplates.close();
+
+			// Reuse the same QTextStream object
+			output.flush();
+
+			QFile taskObjectives(url + "/TaskObjectives.INT");
+			if(!taskObjectives.open(QIODevice::WriteOnly | QIODevice::Text)) {
+				return;
+			}
+			output.setDevice(&taskObjectives);
+			writeInfoHeader(output);
+
+			output << "[TaskObjectives]\n";
+			for(int i = 0; i < missions->count(); ++i) {
+				auto *item = dynamic_cast<MissionListItem *>(missions->item(i));
+				int j = 1;
+				for(auto const &stage: item->ownerStages()) {
+					QString stageText = "Stage";
+					if(j < 9) {
+						stageText += "0" + QString::number(j);
+					} else {
+						stageText += QString::number(j);
+					}
+
+					output << "TaskObjectives_" + item->code() + "_" + stageText + "_OwnerBrief=" + stage.objectives->toPlainText() + "\n";
+					j++;
+				}
+				j = 1;
+				for(auto const &stage: item->dispatchStages()) {
+					QString stageText = "Stage";
+					if(j < 9) {
+						stageText += "0" + QString::number(j);
+					} else {
+						stageText += QString::number(j);
+					}
+
+					output << "TaskObjectives_" + item->code() + "_" + stageText + "_DispatchBrief=" + stage.objectives->toPlainText() + "\n";
+					j++;
+				}
+			}
+			taskObjectives.close();
 		}
 	}
+}
+
+void MainWindow::writeInfoHeader(QTextStream &stream) {
+	stream << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n";
+	stream << "; This file has been generated by cactupia's Localedit\n";
+	stream << "; GitHub:  https://github.com/Electrostasy\n";
+	stream << "; Steam:   https://steamcommunity.com/id/cactupia/\n";
+	stream << "; Discord: cactus#7333\n";
+	stream << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n";
 }
 
 QString MainWindow::verifyAndTrim(const QString &fileName) {
