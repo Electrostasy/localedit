@@ -226,9 +226,10 @@ void MainWindow::openImportFilesDialog() {
 			this->missions->addMission(mission);
 		}
 
-		this->missions->item(0)->setSelected(true);
 		this->missions->currentItemChanged(missions->item(0), nullptr);
+		this->missions->item(0)->setSelected(true);
 		this->exportAction->setEnabled(true);
+		this->updateTitle();
 	}
 }
 
@@ -272,33 +273,64 @@ void MainWindow::exportFiles() {
 			output << "[TaskObjectives]\n";
 			for(int i = 0; i < missions->count(); ++i) {
 				auto *item = dynamic_cast<MissionListItem *>(missions->item(i));
-				int j = 1;
-				for(auto const &stage: item->ownerStages()) {
-					QString stageText = "Stage";
-					if(j < 9) {
-						stageText += "0" + QString::number(j);
-					} else {
-						stageText += QString::number(j);
+
+				// Owner stages gen
+				for(int j = 0; j < item->ownerStages().size(); ++j) {
+					QString stageText = handleStageText(j, item->ownerStages());
+					QString objectives = item->ownerStages()[j].objectives->toPlainText();
+					if(objectives.isEmpty()) {
+						objectives = handleEmptyObjectives(j, item->ownerStages());
 					}
 
-					output << "TaskObjectives_" + item->code() + "_" + stageText + "_OwnerBrief=" + stage.objectives->toPlainText() + "\n";
-					j++;
+					output << "TaskObjectives_" + item->code() + "_" + stageText + "_OwnerBrief=" + objectives + "\n";
 				}
-				j = 1;
-				for(auto const &stage: item->dispatchStages()) {
-					QString stageText = "Stage";
-					if(j < 9) {
-						stageText += "0" + QString::number(j);
-					} else {
-						stageText += QString::number(j);
+
+				// Dispatch stages gen
+				for(int j = 0; j < item->dispatchStages().size(); ++j) {
+					QString stageText = handleStageText(j, item->dispatchStages());
+					QString objectives = item->dispatchStages()[j].objectives->toPlainText();
+					if(objectives.isEmpty()) {
+						objectives = handleEmptyObjectives(j, item->dispatchStages());
 					}
 
-					output << "TaskObjectives_" + item->code() + "_" + stageText + "_DispatchBrief=" + stage.objectives->toPlainText() + "\n";
-					j++;
+					output << "TaskObjectives_" + item->code() + "_" + stageText + "_DispatchBrief=" + objectives + "\n";
 				}
 			}
 			taskObjectives.close();
 		}
+	}
+}
+
+QString MainWindow::handleStageText(const int &index, const QVector<MissionListItem::Stage>& stages) {
+	QString stageText = "Stage";
+	int printedIndex = 1 + index;
+	if(stages[index].hasOpp) {
+		printedIndex--;
+	}
+
+	if(printedIndex < 10) {
+		stageText += "0" + QString::number(printedIndex);
+	} else {
+		stageText += QString::number(printedIndex);
+	}
+
+	if(stages[index].hasOpp) {
+		stageText += "_Opp";
+	}
+
+	return stageText;
+}
+
+QString MainWindow::handleEmptyObjectives(const int &index, const QVector<MissionListItem::Stage>& stagesVec) {
+	if(stagesVec[index].hasOpp && index - 1 >= 0 && !stagesVec[index - 1].hasOpp) {
+		// If this is an empty Opp stage, get objectives from the previous stage
+		return stagesVec[index - 1].objectives->toPlainText();
+	} else if(!stagesVec[index].hasOpp && index + 1 < stagesVec.size() && stagesVec[index + 1].hasOpp) {
+		// Conversely, if this is an empty stage, get objectives from the following Opp stage if it exists
+		return stagesVec[index + 1].objectives->toPlainText();
+	} else {
+		// Or it's just an empty stage, not a peculiarity of the game, so keep it empty
+		return "";
 	}
 }
 

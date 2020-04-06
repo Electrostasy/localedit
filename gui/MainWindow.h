@@ -27,6 +27,8 @@ class MainWindow: public QMainWindow {
 	void initMenusActions();
 	void openImportFilesDialog();
 	static void writeInfoHeader(QTextStream &stream);
+	static QString handleStageText(const int &index, const QVector<MissionListItem::Stage> &stages);
+	static QString handleEmptyObjectives(const int &index, const QVector<MissionListItem::Stage> &stages);
 
 	private slots:
 	void importFiles();
