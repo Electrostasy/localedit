@@ -13,3 +13,22 @@ void MissionListWidget::addMission(MissionListItem *item) {
 		item->listWidget()->setMinimumWidth(width);
 	}
 }
+
+void MissionListWidget::switchItemsText(int state) {
+	switch(state) {
+		case Qt::CheckState::Unchecked:
+			for(int index = 0; index < this->count(); ++index) {
+				auto *item = dynamic_cast<MissionListItem *>(this->item(index));
+				item->setText(item->name());
+			}
+			break;
+		case Qt::CheckState::Checked:
+			for(int index = 0; index < this->count(); ++index) {
+				auto *item = dynamic_cast<MissionListItem *>(this->item(index));
+				item->setText(item->code());
+			}
+			break;
+		default:
+			return;
+	}
+}

@@ -17,6 +17,7 @@ class MainWindow: public QMainWindow {
 	private:
 	const QString applicationName = "Localedit";
 	QLineEdit *search;
+	QCheckBox *nameIdSwitch;
 	MissionListWidget *missions;
 	StagesEditorWidget *stages;
 	QStatusBar *status;

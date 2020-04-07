@@ -10,7 +10,7 @@ This graphical tool is intended to make editing localization files easier for th
 
 #### Features:
 * Syntax highlighting support of `<Col></Col>` tags;
-* Searchable (by mission name) list of missions;
+* Searchable (by mission name and id) list of missions;
 * Tabbed panel for editing opposing sides of a mission's objectives;
 * Cross-platform (even though the game itself isn't, but that was not my goal)
 
