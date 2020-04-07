@@ -165,7 +165,7 @@ void MainWindow::openImportFilesDialog() {
 		}
 
 		QRegularExpression IDENTIFIERS("MissionTemplates_(?<code>[A-Za-z0-9_]+)_MissionTitle=(?<title>.*)");
-		QRegularExpression STAGE_REGEX("TaskObjectives_(?<code>[A-Za-z0-9_]+)_(?:Stage\\d{2}_)(?<special>Opp)?_?(?<side>\\w+)=(?<text>.*)");
+		QRegularExpression STAGE_REGEX("TaskObjectives_(?<code>[A-Za-z0-9_]+?)_(?:Stage\\d\\d_)?(?:(?<special>Opp)_)?(?<side>[A-Za-z]+)=(?<text>.*)");
 
 		QMap<QString, MissionListItem *> map;
 
