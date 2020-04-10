@@ -202,8 +202,14 @@ void MainWindow::openImportFilesDialog() {
 					QString side = match.captured("side");
 					// Some missions have an "Opp" tag on some stages, we flag it as appropriate to avoid displaying it
 					// and then during exporting we copy the data from the equivalent non-Opp stage to it
-					MissionListItem::Stage stage(
-						new QTextDocument(match.captured("text")), !match.captured("special").isEmpty());
+					auto *objectives = new QTextDocument(match.captured("text"));
+					bool opp = !match.captured("special").isEmpty();
+					if(opp) {
+						// Clear any text in Opp stages because we duplicate it on export
+						objectives->setPlainText("");
+					}
+					MissionListItem::Stage stage(objectives, opp);
+
 					if(match.captured("code") == code) {
 						// Ensure we are reading the stages for the mission whose name and code we got earlier
 						if(side == "OwnerBrief") {
