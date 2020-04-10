@@ -168,12 +168,11 @@ void MainWindow::openImportFilesDialog() {
 		QRegularExpression STAGE_REGEX("TaskObjectives_(?<code>[A-Za-z0-9_]+?)_(?:Stage\\d\\d_)?(?:(?<special>Opp)_)?(?<side>[A-Za-z]+)=(?<text>.*)");
 
 		QMap<QString, MissionListItem *> map;
-
-		QTextStream streamTitles(&missionTemplates);
-		QTextStream streamStages(&taskObjectives);
 		QString line;
+
 		// Read mission code and title
-		while(streamTitles.readLineInto(&line)) {
+		QTextStream stream(&missionTemplates);
+		while(stream.readLineInto(&line)) {
 			if(line.startsWith(';')) {
 				continue;
 			}
@@ -189,59 +188,45 @@ void MainWindow::openImportFilesDialog() {
 				}
 				map[code]->setIdentifiers(match.captured("title"), code);
 			}
+		}
+		missionTemplates.close();
 
-			// Read stages for given code
-			while(streamStages.readLineInto(&line)) {
-				// Unlikely to encounter comments, TODO: maybe remove if statement
-				if(line.startsWith(';')) {
-					continue;
+		// Read stages
+		stream.setDevice(&taskObjectives);
+		while(stream.readLineInto(&line)) {
+			// Unlikely to encounter comments, TODO: maybe remove if statement
+			if(line.startsWith(';')) {
+				continue;
+			}
+
+			QRegularExpressionMatch match = STAGE_REGEX.match(line);
+			if(match.hasMatch()) {
+				QString side = match.captured("side");
+				// Some missions have an "Opp" tag on some stages, we flag it as appropriate to avoid displaying it
+				// and then during exporting we copy the data from the equivalent non-Opp stage to it
+				auto *objectives = new QTextDocument(match.captured("text"));
+				bool opp = !match.captured("special").isEmpty();
+				if(opp) {
+					// Clear any text in Opp stages because we duplicate it on export
+					objectives->setPlainText("");
 				}
+				MissionListItem::Stage stage(objectives, opp);
 
-				match = STAGE_REGEX.match(line);
 				if(match.hasMatch()) {
-					QString side = match.captured("side");
-					// Some missions have an "Opp" tag on some stages, we flag it as appropriate to avoid displaying it
-					// and then during exporting we copy the data from the equivalent non-Opp stage to it
-					auto *objectives = new QTextDocument(match.captured("text"));
-					bool opp = !match.captured("special").isEmpty();
-					if(opp) {
-						// Clear any text in Opp stages because we duplicate it on export
-						objectives->setPlainText("");
+					if(map[match.captured("code")] == nullptr) {
+						map[match.captured("code")] = new MissionListItem();
 					}
-					MissionListItem::Stage stage(objectives, opp);
 
-					if(match.captured("code") == code) {
-						// Ensure we are reading the stages for the mission whose name and code we got earlier
-						if(side == "OwnerBrief") {
-							map[code]->pushOwnerStage(stage);
-						}
+					if(side == "OwnerBrief") {
+						map[match.captured("code")]->pushOwnerStage(stage);
+					}
 
-						if(side == "DispatchBrief") {
-							map[code]->pushDispatchStage(stage);
-						}
-					} else {
-						// In the case we overshoot and start reading data of the next mission, just initialize it
-						// and save whatever stage we got from it. On next iteration we continue where we left off on
-						if(map[match.captured("code")] == nullptr) {
-							map[match.captured("code")] = new MissionListItem();
-						}
-
-						if(side == "OwnerBrief") {
-							map[match.captured("code")]->pushOwnerStage(stage);
-						}
-
-						if(side == "DispatchBrief") {
-							map[match.captured("code")]->pushDispatchStage(stage);
-						}
-
-						// End this loop since we overshot
-						break;
+					if(side == "DispatchBrief") {
+						map[match.captured("code")]->pushDispatchStage(stage);
 					}
 				}
 			}
 		}
-
-		missionTemplates.close();
 		taskObjectives.close();
 
 		// Build list item widgets
