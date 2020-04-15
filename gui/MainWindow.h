@@ -2,11 +2,12 @@
 
 #include <QtWidgets>
 
+#include "FramelessMainWindow.h"
 #include "MissionList/MissionListItem.h"
 #include "MissionList/MissionListWidget.h"
 #include "StagesEditor/StagesEditorWidget.h"
 
-class MainWindow: public QMainWindow {
+class MainWindow: public FramelessMainWindow {
 	public:
 	explicit MainWindow();
 	void updateTitle();
@@ -29,6 +30,7 @@ class MainWindow: public QMainWindow {
 	void initMenusActions();
 	void openImportFilesDialog();
 	static void writeInfoHeader(QTextStream &stream);
+	void parseLine(const QString& line);
 	static QString handleStageText(const int &index, const QVector<MissionListItem::Stage> &stages);
 	static QString handleEmptyObjectives(const int &index, const QVector<MissionListItem::Stage> &stages);
 	void triggerAboutDialog();

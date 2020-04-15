@@ -52,10 +52,10 @@ MainWindow::MainWindow() {
 	splitterContainer->setLayout(new QHBoxLayout());
 	splitterContainer->layout()->addWidget(splitter);
 
-	this->setCentralWidget(splitterContainer);
+	this->content()->setCentralWidget(splitterContainer);
 	status = new QStatusBar();
 	status->setSizeGripEnabled(false);
-	this->setStatusBar(status);
+	this->content()->setStatusBar(status);
 	this->setWindowTitle(applicationName);
 
 	initMenusActions();
@@ -84,18 +84,18 @@ void MainWindow::initMenusActions() {
 	importAction = new QAction("Import");
 	importAction->setStatusTip("Select and import localization files to edit");
 	connect(importAction, &QAction::triggered, this, &MainWindow::importFiles);
-	this->menuBar()->addAction(importAction);
+	this->content()->menuBar()->addAction(importAction);
 
 	exportAction = new QAction("Export");
 	exportAction->setEnabled(false);
 	exportAction->setStatusTip("Export localization files to selected folder");
 	connect(exportAction, &QAction::triggered, this, &MainWindow::exportFiles);
-	this->menuBar()->addAction(exportAction);
+	this->content()->menuBar()->addAction(exportAction);
 
 	aboutAction = new QAction("About");
 	aboutAction->setStatusTip("View author and other information about this program");
 	connect(aboutAction, &QAction::triggered, this, &MainWindow::triggerAboutDialog);
-	this->menuBar()->addAction(aboutAction);
+	this->content()->menuBar()->addAction(aboutAction);
 }
 
 void MainWindow::importFiles() {
@@ -242,6 +242,29 @@ void MainWindow::openImportFilesDialog() {
 		this->missions->item(0)->setSelected(true);
 		this->exportAction->setEnabled(true);
 		this->updateTitle();
+	}
+}
+
+void MainWindow::parseLine(const QString& line) {
+	QString code;
+	bool isOpp;
+
+	int underscoreCount = 0;
+	for(QString::const_iterator lineIter = line.begin(); lineIter != line.end(); ++lineIter) {
+		// Important blocks are usually separated by underscores
+		if(*lineIter == '_') {
+			++underscoreCount;
+			if(underscoreCount == 1 && ++lineIter != line.end()) {
+				// Between 1st and 2nd underscores is our mission code
+				for(QString::const_iterator codeIter = ++lineIter; codeIter != line.end() && *codeIter != '_'; ++codeIter, ++lineIter) {
+					// code += *c1;
+				}
+			}
+
+			if(underscoreCount == 2) {
+
+			}
+		}
 	}
 }
 

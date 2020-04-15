@@ -9,6 +9,10 @@ set(CMAKE_AUTORCC ON)
 
 set(SOURCE_FILES
         main.cpp
+        gui/FramelessMainWindow.cpp
+        gui/FramelessMainWindow.h
+        gui/APBPushButton.cpp
+        gui/APBPushButton.h
         gui/MainWindow.cpp
         gui/MainWindow.h
         gui/MissionList/MissionListItem.cpp
