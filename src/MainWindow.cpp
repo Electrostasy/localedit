@@ -3,22 +3,60 @@
 MainWindow::MainWindow() {
 	QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF8"));
 
+	// Setup title bar
+	this->setWindowTitle(applicationName);
+	this->titleBar = new APBFramelessWindowTitleBar();
+	this->titleBar->setAutoFillBackground(true);
+	this->titleBar->setFixedHeight(60);
+	// TODO ADD: Native window minimizing, maximizing, restoring and closing is required
+	connect(this->titleBar, &APBFramelessWindowTitleBar::minimizeButtonClicked, this, &QWidget::showMinimized);
+	connect(this->titleBar, &APBFramelessWindowTitleBar::restoreButtonClicked, this, &QWidget::showNormal);
+	connect(this->titleBar, &APBFramelessWindowTitleBar::maximizeButtonClicked, this, &QWidget::showMaximized);
+	connect(this->titleBar, &APBFramelessWindowTitleBar::closeButtonClicked, this, &QWidget::close);
+	// connect(this, &APBFramelessWindow::setWindowTitle, this->titleBar(), &APBFramelessWindowTitleBar::setTitleBarText);
+
+	// Create import/export buttons
+	auto horizontalButtonLayout = new QHBoxLayout();
+	importButton = new APBPushButton("Import");
+	exportButton = new APBPushButton("Export");
+	exportButton->setDisabled(true);
+	connect(importButton, &APBPushButton::released, this, &MainWindow::openImportFilesDialog);
+	connect(exportButton, &APBPushButton::released, this, &MainWindow::exportFiles);
+	horizontalButtonLayout->addWidget(importButton);
+	horizontalButtonLayout->addWidget(exportButton);
+	horizontalButtonLayout->setMargin(0);
+	horizontalButtonLayout->setSpacing(5);
+
+	// Create the missions search bar
+	auto *horizontalSearchLayout = new QHBoxLayout();
 	search = new QLineEdit();
 	search->setDisabled(true);
 	search->setPlaceholderText("Search missions...");
 	nameIdSwitch = new QCheckBox();
 	nameIdSwitch->setDisabled(true);
+	nameIdSwitch->setStatusTip("Switch between displaying mission codes and titles");
+	connect(search, &QLineEdit::textChanged, this, &MainWindow::searchMissionList);
+	horizontalSearchLayout->addWidget(search);
+	horizontalSearchLayout->addWidget(nameIdSwitch);
+	horizontalSearchLayout->setMargin(0);
+
+	// Create the mission list then add the buttons and search bar
+	auto *verticalMissionsLayout = new QVBoxLayout();
 	missions = new MissionListWidget();
 	missions->setDisabled(true);
-
-	nameIdSwitch->setStatusTip("Switch between displaying mission codes and titles");
-
 	connect(nameIdSwitch, &QCheckBox::stateChanged, missions, &MissionListWidget::switchItemsText);
-	connect(search, &QLineEdit::textChanged, this, &MainWindow::searchMissionList);
 	connect(missions, &QListWidget::currentItemChanged, this, &MainWindow::updateTitle);
+	verticalMissionsLayout->addLayout(horizontalButtonLayout);
+	verticalMissionsLayout->addLayout(horizontalSearchLayout);
+	verticalMissionsLayout->addWidget(missions);
+	verticalMissionsLayout->setMargin(0);
+
+	auto *splitter = new QSplitter();
+
+	auto *missionListContainer = new QWidget();
+	missionListContainer->setLayout(verticalMissionsLayout);
 
 	stages = new StagesEditorWidget();
-
 	connect(missions, &QListWidget::currentItemChanged, this, [=](QListWidgetItem *currentItem) {
 		// Upcasting from MissionListItem* to QListWidgetItem* on item addition to QListWidget*
 		// Downcasting from QListWidgetItem* to MissionListItem* here on currentItemChanged
@@ -30,35 +68,21 @@ MainWindow::MainWindow() {
 		}
 	});
 
-	auto *missionsSearchLayout = new QHBoxLayout();
-	missionsSearchLayout->addWidget(search);
-	missionsSearchLayout->addWidget(nameIdSwitch);
-	missionsSearchLayout->setMargin(0);
-
-	auto *missionsLayout = new QVBoxLayout();
-	missionsLayout->addLayout(missionsSearchLayout);
-	missionsLayout->addWidget(missions);
-	missionsLayout->setMargin(0);
-
-	auto splitter = new QSplitter();
-	auto missionListContainer = new QWidget();
-	missionListContainer->setLayout(missionsLayout);
 	splitter->addWidget(missionListContainer);
 	splitter->addWidget(stages);
 	splitter->setChildrenCollapsible(false);
 	splitter->setSizes(QList{ missionListContainer->width() / 3, splitter->width() - missionListContainer->width() / 3 });
+	this->setLayout(new QVBoxLayout());
+	this->layout()->setMargin(0);
+	this->layout()->setContentsMargins(0, 0, 0, 0);
+	this->layout()->setSpacing(5);
+	this->layout()->addWidget(this->titleBar);
+	this->layout()->addWidget(splitter);
 
-	auto splitterContainer = new QWidget();
-	splitterContainer->setLayout(new QHBoxLayout());
-	splitterContainer->layout()->addWidget(splitter);
-
-	this->content()->setCentralWidget(splitterContainer);
-	status = new QStatusBar();
-	status->setSizeGripEnabled(false);
-	this->content()->setStatusBar(status);
-	this->setWindowTitle(applicationName);
-
-	initMenusActions();
+	// Add styling using QPalette to the main window
+	QPalette palette = this->palette();
+	palette.setColor(QPalette::ColorRole::Window, QColor(94, 94, 94));
+	this->setPalette(palette);
 }
 
 void MainWindow::searchMissionList(const QString &filter) {
@@ -78,24 +102,6 @@ void MainWindow::updateTitle() {
 	}
 
 	this->setWindowTitle(title);
-}
-
-void MainWindow::initMenusActions() {
-	importAction = new QAction("Import");
-	importAction->setStatusTip("Select and import localization files to edit");
-	connect(importAction, &QAction::triggered, this, &MainWindow::importFiles);
-	this->content()->menuBar()->addAction(importAction);
-
-	exportAction = new QAction("Export");
-	exportAction->setEnabled(false);
-	exportAction->setStatusTip("Export localization files to selected folder");
-	connect(exportAction, &QAction::triggered, this, &MainWindow::exportFiles);
-	this->content()->menuBar()->addAction(exportAction);
-
-	aboutAction = new QAction("About");
-	aboutAction->setStatusTip("View author and other information about this program");
-	connect(aboutAction, &QAction::triggered, this, &MainWindow::triggerAboutDialog);
-	this->content()->menuBar()->addAction(aboutAction);
 }
 
 void MainWindow::importFiles() {
@@ -234,37 +240,14 @@ void MainWindow::openImportFilesDialog() {
 			this->missions->addMission(mission);
 		}
 
+		exportButton->setDisabled(false);
 		search->setDisabled(false);
 		nameIdSwitch->setDisabled(false);
 		nameIdSwitch->setCheckState(Qt::CheckState::Unchecked);
 		missions->setDisabled(false);
 		this->missions->currentItemChanged(missions->item(0), nullptr);
 		this->missions->item(0)->setSelected(true);
-		this->exportAction->setEnabled(true);
 		this->updateTitle();
-	}
-}
-
-void MainWindow::parseLine(const QString& line) {
-	QString code;
-	bool isOpp;
-
-	int underscoreCount = 0;
-	for(QString::const_iterator lineIter = line.begin(); lineIter != line.end(); ++lineIter) {
-		// Important blocks are usually separated by underscores
-		if(*lineIter == '_') {
-			++underscoreCount;
-			if(underscoreCount == 1 && ++lineIter != line.end()) {
-				// Between 1st and 2nd underscores is our mission code
-				for(QString::const_iterator codeIter = ++lineIter; codeIter != line.end() && *codeIter != '_'; ++codeIter, ++lineIter) {
-					// code += *c1;
-				}
-			}
-
-			if(underscoreCount == 2) {
-
-			}
-		}
 	}
 }
 
@@ -384,16 +367,21 @@ QString MainWindow::verifyAndTrim(const QString &fileName) {
 	return match.captured("fileName");
 }
 
-void MainWindow::triggerAboutDialog() {
-	QMessageBox aboutDialog;
-	aboutDialog.setWindowTitle("About " + this->applicationName);
-	aboutDialog.setText("This application is meant to aid the user in modifying localization files for the " \
-					    "video game APB Reloaded.\n\nContact me:\nDiscord - cactus#7333\nSteam - " \
-						"https://steamcommunity.com/id/cactupia/");
-	aboutDialog.setWindowModality(Qt::WindowModality::NonModal);
-	aboutDialog.setStandardButtons(QMessageBox::StandardButton::Ok);
-	aboutDialog.setDefaultButton(QMessageBox::StandardButton::Ok);
-	if(aboutDialog.exec() == QMessageBox::StandardButton::Ok) {
-		return;
-	}
+// Tint the background colour of the window
+void MainWindow::paintEvent(QPaintEvent *paintEvent) {
+	auto *painter = new QPainter(this);
+
+	QColor backgroundColor = palette().window().color();
+	backgroundColor.setAlpha(175);
+	painter->fillRect(this->rect(), backgroundColor);
+
+	painter->end();
+	QWidget::paintEvent(paintEvent);
+}
+
+bool MainWindow::isTitleBarHit(const QRect &iRect, const long iBorderWidth, long iX, long iY) {
+	bool isHeightSatisfied = iY >= iRect.top() && iY < iRect.top() + this->titleBar->height();
+	bool isWidthSatisfied = iX >= iRect.left() && iX < iRect.right() - this->titleBar->buttonsWidth();
+
+	return isHeightSatisfied && isWidthSatisfied;
 }

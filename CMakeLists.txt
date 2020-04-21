@@ -1,46 +1,42 @@
 cmake_minimum_required(VERSION 3.15)
-project(apb_config)
+
+project(Localedit LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_AUTOMOC ON)
-# set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 set(SOURCE_FILES
-        main.cpp
-        gui/FramelessMainWindow.cpp
-        gui/FramelessMainWindow.h
-        gui/APBPushButton.cpp
-        gui/APBPushButton.h
-        gui/MainWindow.cpp
-        gui/MainWindow.h
-        gui/MissionList/MissionListItem.cpp
-        gui/MissionList/MissionListWidget.cpp
-        gui/MissionList/MissionListWidget.h
-        gui/PreviewBoxWidget.cpp
-        gui/PreviewBoxWidget.h
-        gui/StagesEditor/StagesEditorWidget.cpp
-        gui/StagesEditor/StagesEditorWidget.h
-        gui/StagesEditor/ExpandedTextEdit.cpp
-        gui/StagesEditor/ExpandedTextEdit.h
-        gui/StagesEditor/FramedPage.cpp
-        gui/StagesEditor/FramedPage.h
-        gui/StagesEditor/SyntaxHighlighter.cpp
-        gui/StagesEditor/SyntaxHighlighter.h
-        gui/StagesEditor/TabWidget/ExpandingTabBar.cpp
-        gui/StagesEditor/TabWidget/ExpandingTabBar.h
-        gui/StagesEditor/TabWidget/ExpandingTabWidget.cpp
-        gui/StagesEditor/TabWidget/ExpandingTabWidget.h
-        gui/Utility/LayoutUtils.cpp
-        gui/Utility/LayoutUtils.h
-        resources.qrc)
+    src/main.cpp
+    src/MainWindow.cpp
+    src/MainWindow.h
+    src/APBFramelessWindow/APBFramelessWindowTitleBar.h
+        src/APBFramelessWindow/APBFramelessWindowTitleBar.cpp
+    src/APBFramelessWindow/APBPushButton.cpp
+    src/APBFramelessWindow/APBPushButton.h
+    src/MissionList/MissionListItem.cpp
+    src/MissionList/MissionListWidget.cpp
+    src/MissionList/MissionListWidget.h
+    # src/PreviewBoxWidget.cpp
+    # src/PreviewBoxWidget.h
+    src/StagesEditor/StagesEditorWidget.cpp
+    src/StagesEditor/StagesEditorWidget.h
+    src/StagesEditor/ExpandedTextEdit.cpp
+    src/StagesEditor/ExpandedTextEdit.h
+    src/StagesEditor/TabWidget/FramedPage.cpp
+    src/StagesEditor/TabWidget/FramedPage.h
+    src/StagesEditor/SyntaxHighlighter.cpp
+    src/StagesEditor/SyntaxHighlighter.h
+    src/StagesEditor/TabWidget/ExpandingTabBar.cpp
+    src/StagesEditor/TabWidget/ExpandingTabBar.h
+    src/StagesEditor/TabWidget/ExpandingTabWidget.cpp
+    src/StagesEditor/TabWidget/ExpandingTabWidget.h
+    src/Utility/LayoutUtils.cpp
+    src/Utility/LayoutUtils.h
+    src/resources.qrc
+        src/APBFramelessWindow/NativeTranslucentFramelessWindow.cpp src/APBFramelessWindow/NativeTranslucentFramelessWindow.h)
 
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Gui REQUIRED)
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-add_executable(apb_config ${SOURCE_FILES})
-
-# Link Qt libraries to the executable
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
+target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::WinExtras Dwmapi)

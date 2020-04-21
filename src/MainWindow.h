@@ -2,12 +2,14 @@
 
 #include <QtWidgets>
 
-#include "FramelessMainWindow.h"
+#include "APBFramelessWindow/NativeTranslucentFramelessWindow.h"
+#include "APBFramelessWindow/APBFramelessWindowTitleBar.h"
+#include "APBFramelessWindow/APBPushButton.h"
 #include "MissionList/MissionListItem.h"
 #include "MissionList/MissionListWidget.h"
 #include "StagesEditor/StagesEditorWidget.h"
 
-class MainWindow: public FramelessMainWindow {
+class MainWindow: public NativeTranslucentFramelessWindow {
 	public:
 	explicit MainWindow();
 	void updateTitle();
@@ -15,25 +17,25 @@ class MainWindow: public FramelessMainWindow {
 	public slots:
 	void searchMissionList(const QString &filter);
 
+	protected:
+	void paintEvent(QPaintEvent *paintEvent) override;
+	bool isTitleBarHit(const QRect &iRect, const long iBorderWidth, long iX, long iY) override;
+
 	private:
+	APBFramelessWindowTitleBar *titleBar;
 	const QString applicationName = "Localedit";
+	APBPushButton *importButton;
+	APBPushButton *exportButton;
 	QLineEdit *search;
 	QCheckBox *nameIdSwitch;
 	MissionListWidget *missions;
 	StagesEditorWidget *stages;
-	QStatusBar *status;
-	QAction *importAction;
-	QAction *exportAction;
-	QAction *aboutAction;
 
 	static QString verifyAndTrim(const QString &fileName);
-	void initMenusActions();
 	void openImportFilesDialog();
 	static void writeInfoHeader(QTextStream &stream);
-	void parseLine(const QString& line);
 	static QString handleStageText(const int &index, const QVector<MissionListItem::Stage> &stages);
 	static QString handleEmptyObjectives(const int &index, const QVector<MissionListItem::Stage> &stages);
-	void triggerAboutDialog();
 
 	private slots:
 	void importFiles();

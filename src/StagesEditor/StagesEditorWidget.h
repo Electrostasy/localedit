@@ -6,8 +6,8 @@
 #include "../MissionList/MissionListWidget.h"
 #include "../Utility/LayoutUtils.h"
 #include "ExpandedTextEdit.h"
-#include "FramedPage.h"
 #include "TabWidget/ExpandingTabWidget.h"
+#include "TabWidget/FramedPage.h"
 
 class StagesEditorWidget: public QWidget {
 	Q_OBJECT
