@@ -7,6 +7,7 @@ class APBPushButton: public QPushButton {
 
 	public:
 	explicit APBPushButton(QWidget *parent = nullptr);
+	explicit APBPushButton(const QString &text, QWidget *parent = nullptr);
 	void setButtonColour(const QColor &colour);
 	void blinkOnHover(bool blink);
 

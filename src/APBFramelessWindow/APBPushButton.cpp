@@ -12,10 +12,17 @@ APBPushButton::APBPushButton(QWidget *parent): QPushButton(parent) {
 	this->baseColour = QColor(137, 137, 137);
 
 	QPalette palette = this->palette();
-	palette.setColor(QPalette::ColorRole::Highlight, this->black);
-	palette.setColor(QPalette::ColorRole::Button, this->baseColour);
-	palette.setColor(QPalette::ColorRole::ButtonText, this->lightGrey);
+	palette.setColor(QPalette::ColorGroup::Normal, QPalette::ColorRole::Highlight, this->black);
+	palette.setColor(QPalette::ColorGroup::Normal, QPalette::ColorRole::Button, this->baseColour);
+	palette.setColor(QPalette::ColorGroup::Normal, QPalette::ColorRole::ButtonText, this->lightGrey);
+	palette.setColor(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Highlight, QColor(50, 50, 50));
+	palette.setColor(QPalette::ColorGroup::Disabled, QPalette::ColorRole::Button, QColor(100, 100, 100));
+	palette.setColor(QPalette::ColorGroup::Disabled, QPalette::ColorRole::ButtonText, QColor(120, 120, 120));
 	this->setPalette(palette);
+}
+
+APBPushButton::APBPushButton(const QString &text, QWidget *parent): APBPushButton(parent) {
+	this->setText(text);
 }
 
 bool APBPushButton::event(QEvent *event) {
@@ -23,44 +30,65 @@ bool APBPushButton::event(QEvent *event) {
 
 	switch(event->type()) {
 		case QEvent::Type::HoverEnter:
-			// If a QTimeLine object exists, start the blink timer, otherwise just make it brighter
-			if(this->timer != nullptr) {
-				this->startTimer(&palette);
-			} else {
-				this->setLighterColour(&palette);
+			if(this->isEnabled()) {
+				// If a QTimeLine object exists, start the blink timer, otherwise just make it brighter
+				if(this->timer != nullptr) {
+					this->startTimer(&palette);
+				} else {
+					this->setLighterColour(&palette);
+				}
 			}
+
 			break;
 		case QEvent::Type::HoverLeave:
-			// If a QTimeLine object exists, stop the blink timer, otherwise just make it darker
-			if(this->timer != nullptr) {
-				this->stopTimer(&palette);
-			} else {
-				this->setDarkerColour(&palette);
+			if(this->isEnabled()) {
+				// If a QTimeLine object exists, stop the blink timer, otherwise just make it darker
+				if(this->timer != nullptr) {
+					this->stopTimer(&palette);
+				} else {
+					this->setDarkerColour(&palette);
+				}
 			}
+
 			break;
 		case QEvent::MouseButtonPress:
-			// If a QTimeLine object exists, stop the blink timer to retain highlight colours
-			if(this->timer != nullptr) {
-				this->stopTimer(&palette);
+			if(this->isEnabled()) {
+				// If a QTimeLine object exists, stop the blink timer to retain highlight colours
+				if(this->timer != nullptr) {
+					this->stopTimer(&palette);
+				}
+
+				this->setHighlight(&palette);
+
+				emit this->pressed();
 			}
 
-			this->setHighlight(&palette);
 			break;
 		case QEvent::MouseButtonDblClick:
-			// If a QTimeLine object exists, stop the blink timer to retain highlight colours
-			if(this->timer != nullptr) {
-				this->stopTimer(&palette);
+			if(this->isEnabled()) {
+				// If a QTimeLine object exists, stop the blink timer to retain highlight colours
+				if(this->timer != nullptr) {
+					this->stopTimer(&palette);
+				}
+
+				this->setHighlight(&palette);
+
+				emit this->clicked();
 			}
 
-			this->setHighlight(&palette);
 			break;
 		case QEvent::MouseButtonRelease:
-			this->restoreDefaults(&palette);
+			if(this->isEnabled()) {
+				this->restoreDefaults(&palette);
 
-			// If a QTimeLine object exists, start the blink timer instead of reverting to static colour
-			if(this->timer != nullptr) {
-				this->startTimer(&palette);
+				// If a QTimeLine object exists, start the blink timer instead of reverting to static colour
+				if(this->timer != nullptr) {
+					this->startTimer(&palette);
+				}
+
+				emit this->released();
 			}
+
 			break;
 		default:
 			return QPushButton::event(event);
