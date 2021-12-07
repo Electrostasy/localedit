@@ -20,7 +20,16 @@ them yourself (as in, select the contents of the folder, not just the folder its
 To export your edited objectives and missions, you need only select the folder you want them to be in, however
 it WILL likely overwrite or append to existing files, so I recommend being careful with that!
 
+#### Compiling from source
+##### Windows (MSVC)
+This assumes that `$QT_DIR` is your Qt installation directory (for example `C:\Qt\5.15.2`) and `$MSVC` is your MSVC compiler
+version (for example `msvc2019_64`), and the following directories are part of your PATH environment variable:
+* `$QT_DIR\$MSVC\lib\cmake`
+* `QT_DIR\Tools\Cmake64_bin`
 
-#### Downloads
-##### Windows binaries
-x64 binaries are in the Releases section of this repository.
+Create a new directory in the project root and run the following commands in it to compile in Debug mode:
+```powershell
+cmake .. -G"Visual Studio 17 2022"
+cmake --build .
+```
+The compiled executable will be `.\Debug\Localedit.exe`, with all required dependencies (Qt DLLs) copied over.
