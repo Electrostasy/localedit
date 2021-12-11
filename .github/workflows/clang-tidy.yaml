@@ -2,9 +2,6 @@ name: clang-tidy-review
 
 on: [pull_request]
 
-env:
-  BUILD_TYPE: Debug
-
 jobs:
   review:
     runs-on: ubuntu-latest
@@ -17,7 +14,7 @@ jobs:
       - name: Create compile_commands.json
         run: |
           cmake --version
-          cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_EXPORT_COMPILE_COMMANDS=On
+          cmake -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
       - name: Run clang-tidy
         uses: ZedThree/clang-tidy-review@v0.7.0
