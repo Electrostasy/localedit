@@ -12,6 +12,9 @@ class ExpandingTabBar: public QTabBar {
 	protected:
 	bool event(QEvent *event) override;
 	void paintEvent(QPaintEvent *paintEvent) override;
+	void restorePen(QPen pen, int index);
+	void setBrush(QPainter* painter, int index);
+	QRect createTabRect(int index);
 	int outerPaintMargin = 4;
 	int mouseoveredTab;
 };
