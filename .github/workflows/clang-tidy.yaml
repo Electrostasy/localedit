@@ -1,0 +1,26 @@
+name: clang-tidy-review
+
+on: [pull_request]
+
+env:
+  BUILD_TYPE: Debug
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+
+      - name: Create compile_commands.json
+        run: |
+          cmake --version
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_EXPORT_COMPILE_COMMANDS=On
+
+      - name: Run clang-tidy
+        uses: ZedThree/clang-tidy-review@v0.7.0
+        id: review
+        with:
+          build_dir: ${{github.workspace}}/build
