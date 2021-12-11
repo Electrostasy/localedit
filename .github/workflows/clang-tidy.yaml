@@ -17,10 +17,10 @@ jobs:
       - name: Create compile_commands.json
         run: |
           cmake --version
-          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_EXPORT_COMPILE_COMMANDS=On
+          cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_EXPORT_COMPILE_COMMANDS=On
 
       - name: Run clang-tidy
         uses: ZedThree/clang-tidy-review@v0.7.0
         id: review
         with:
-          build_dir: ${{github.workspace}}/build
+          build_dir: build
