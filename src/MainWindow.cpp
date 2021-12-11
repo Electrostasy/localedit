@@ -3,25 +3,13 @@
 MainWindow::MainWindow() {
 	QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF8"));
 
-	// Setup title bar
-	this->setWindowTitle(applicationName);
-	this->titleBar = new APBFramelessWindowTitleBar();
-	this->titleBar->setAutoFillBackground(true);
-	this->titleBar->setFixedHeight(60);
-	// TODO ADD: Native window minimizing, maximizing, restoring and closing is required
-	connect(this->titleBar, &APBFramelessWindowTitleBar::minimizeButtonClicked, this, &QWidget::showMinimized);
-	connect(this->titleBar, &APBFramelessWindowTitleBar::restoreButtonClicked, this, &QWidget::showNormal);
-	connect(this->titleBar, &APBFramelessWindowTitleBar::maximizeButtonClicked, this, &QWidget::showMaximized);
-	connect(this->titleBar, &APBFramelessWindowTitleBar::closeButtonClicked, this, &QWidget::close);
-	// connect(this, &APBFramelessWindow::setWindowTitle, this->titleBar(), &APBFramelessWindowTitleBar::setTitleBarText);
-
 	// Create import/export buttons
 	auto horizontalButtonLayout = new QHBoxLayout();
-	importButton = new APBPushButton("Import");
-	exportButton = new APBPushButton("Export");
+	importButton = new PushButtonBase("Import");
+	exportButton = new PushButtonBase("Export");
 	exportButton->setDisabled(true);
-	connect(importButton, &APBPushButton::released, this, &MainWindow::openImportFilesDialog);
-	connect(exportButton, &APBPushButton::released, this, &MainWindow::exportFiles);
+	connect(importButton, &PushButtonBase::released, this, &MainWindow::openImportFilesDialog);
+	connect(exportButton, &PushButtonBase::released, this, &MainWindow::exportFiles);
 	horizontalButtonLayout->addWidget(importButton);
 	horizontalButtonLayout->addWidget(exportButton);
 	horizontalButtonLayout->setMargin(0);
@@ -72,11 +60,12 @@ MainWindow::MainWindow() {
 	splitter->addWidget(stages);
 	splitter->setChildrenCollapsible(false);
 	splitter->setSizes(QList{ missionListContainer->width() / 3, splitter->width() - missionListContainer->width() / 3 });
-	this->setLayout(new QVBoxLayout());
+	if(this->layout() == nullptr) {
+    this->setLayout(new QVBoxLayout());
+  };
 	this->layout()->setMargin(0);
 	this->layout()->setContentsMargins(0, 0, 0, 0);
 	this->layout()->setSpacing(5);
-	this->layout()->addWidget(this->titleBar);
 	this->layout()->addWidget(splitter);
 
 	// Add styling using QPalette to the main window
@@ -94,7 +83,7 @@ void MainWindow::searchMissionList(const QString &filter) {
 }
 
 void MainWindow::updateTitle() {
-	QString title = applicationName;
+	QString title = this->applicationName;
 
 	auto *currentItem = dynamic_cast<MissionListItem *>(missions->currentItem());
 	if(currentItem != nullptr) {
@@ -379,9 +368,3 @@ void MainWindow::paintEvent(QPaintEvent *paintEvent) {
 	QWidget::paintEvent(paintEvent);
 }
 
-bool MainWindow::isTitleBarHit(const QRect &iRect, const long iBorderWidth, long iX, long iY) {
-	bool isHeightSatisfied = iY >= iRect.top() && iY < iRect.top() + this->titleBar->height();
-	bool isWidthSatisfied = iX >= iRect.left() && iX < iRect.right() - this->titleBar->buttonsWidth();
-
-	return isHeightSatisfied && isWidthSatisfied;
-}

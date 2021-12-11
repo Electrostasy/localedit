@@ -1,5 +1,20 @@
 #include "NativeTranslucentFramelessWindow.h"
+
 NativeTranslucentFramelessWindow::NativeTranslucentFramelessWindow(QWidget *parent): QWidget(parent), borderWidth(8) {
+	// Setup title bar
+	// this->setWindowTitle(applicationName);
+	this->titleBar = new APBFramelessWindowTitleBar();
+	this->titleBar->setAutoFillBackground(true);
+	this->titleBar->setFixedHeight(60);
+	// TODO: Add native window minimizing, maximizing, restoring and closing
+	connect(this->titleBar, &APBFramelessWindowTitleBar::minimizeButtonClicked, this, &QWidget::showMinimized);
+	connect(this->titleBar, &APBFramelessWindowTitleBar::restoreButtonClicked, this, &QWidget::showNormal);
+	connect(this->titleBar, &APBFramelessWindowTitleBar::maximizeButtonClicked, this, &QWidget::showMaximized);
+	connect(this->titleBar, &APBFramelessWindowTitleBar::closeButtonClicked, this, &QWidget::close);
+	// connect(this, &APBFramelessWindow::setWindowTitle, this->titleBar(), &APBFramelessWindowTitleBar::setTitleBarText);
+	this->setLayout(new QVBoxLayout());
+	this->layout()->addWidget(this->titleBar);
+
 	// This flag is important for seeing behing the Qt painting of widgets and actually seeing the blur behind
 	this->setAttribute(Qt::WA_TranslucentBackground);
 
@@ -130,6 +145,8 @@ bool NativeTranslucentFramelessWindow::isBottomLeftCornerHit(const QRect &iRect,
 }
 
 bool NativeTranslucentFramelessWindow::isTitleBarHit(const QRect &iRect, const long iBorderWidth, long iX, long iY) {
-	// Re-implement in inheriting class to denote "draggable" area
-	return true;
+	bool isHeightSatisfied = iY >= iRect.top() && iY < iRect.top() + this->titleBar->height();
+	bool isWidthSatisfied = iX >= iRect.left() && iX < iRect.right() - this->titleBar->buttonsWidth();
+
+	return isHeightSatisfied && isWidthSatisfied;
 }
