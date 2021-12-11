@@ -25,7 +25,7 @@ it WILL likely overwrite or append to existing files, so I recommend being caref
 This assumes that `$QT_DIR` is your Qt installation directory (for example `C:\Qt\5.15.2`) and `$MSVC` is your MSVC compiler
 version (for example `msvc2019_64`), and the following directories are part of your PATH environment variable:
 * `$QT_DIR\$MSVC\lib\cmake`
-* `QT_DIR\Tools\Cmake64_bin`
+* `$QT_DIR\Tools\Cmake64_bin`
 
 Create a new directory in the project root and run the following commands in it to compile in Debug mode:
 ```powershell
@@ -33,3 +33,17 @@ cmake .. -G"Visual Studio 17 2022"
 cmake --build .
 ```
 The compiled executable will be `.\Debug\Localedit.exe`, with all required dependencies (Qt DLLs) copied over.
+
+##### Linux (Nix)
+This does not assume anything about your Qt installation, your package manager should take care of it.
+You can fetch all pinned dependencies in a [Nix](https://nixos.org/download.html#nix-quick-install)
+[flake](https://github.com/mschwaig/howto-install-nix-with-flake-support)-based development shell by running
+`nix develop` in the project root (or `nix develop -c zsh` if you don't like bash), and then building the project:
+```bash
+cmake . -B build
+cd build
+cmake --build .
+```
+The compiled executable will be `./Localedit`. Note that depending on the display server (X/Wayland), you may
+require the appropriate Qt libraries installed to run the compiled executable.
+
