@@ -1,0 +1,45 @@
+name: CI Build
+
+on: 
+  push:
+  pull_request:
+    types: [opened]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        include:
+          - os: windows-latest
+            generator: 'Visual Studio 16 2019'
+          - os: ubuntu-latest
+            generator: 'Unix Makefiles'
+          - os: macos-latest
+            generator: 'Xcode'
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          dir: ${{ github.workspace }}
+        
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-QtCache
+        
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+        
+      - name: Build
+        run: |
+          cmake . -B '${{ github.workspace }}/build' -G'${{ matrix.generator }}'
+          cd build
+          cmake --build .

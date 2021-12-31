@@ -15,35 +15,56 @@ This graphical tool is intended to make editing localization files easier for th
 * Cross-platform (even though the game itself isn't, but that was not my goal)
 
 You can import the entire contents of a folder and the program will find the required files, you don't have to look for
-them yourself (as in, select the contents of the folder, not just the folder itself, there's a future TODO for me!).
+them yourself.
 
 To export your edited objectives and missions, you need only select the folder you want them to be in, however
 it WILL likely overwrite or append to existing files, so I recommend being careful with that!
 
 #### Compiling from source
 ##### Windows (MSVC)
-This assumes that `$QT_DIR` is your Qt installation directory (for example `C:\Qt\5.15.2`) and `$MSVC` is your MSVC compiler
-version (for example `msvc2019_64`), and the following directories are part of your PATH environment variable:
-* `$QT_DIR\$MSVC\lib\cmake`
-* `$QT_DIR\Tools\Cmake64_bin`
+###### Requirements
+You need working installations of:
+* 'Visual Studio 16 2019' for the compiler ([official direct download](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=16))
+* Qt 5.15.2 with the 'msvc2019_64' target and CMake build system support
+Make sure Qt 5.15.2 'msvc2019_64' compiler tools and CMake libs are present in
+your PATH environment variable.
 
-Create a new directory in the project root and run the following commands in it to compile in Debug mode:
+###### Compilation
+To compile from source in a Windows environment, clone this project and execute these commands
+in the project root directory:
 ```powershell
-cmake .. -G"Visual Studio 17 2022"
+cmake . -B build -G"Visual Studio 16 2019"
+cd build
 cmake --build .
 ```
-The compiled executable will be `.\Debug\Localedit.exe`, with all required dependencies (Qt DLLs) copied over.
+The compiled executable with debug symbols will be `.\Debug\Localedit.exe`,
+with all required dependencies (Qt DLLs) copied over.
 
-##### Linux (Nix)
-This does not assume anything about your Qt installation, your package manager should take care of it.
-You can fetch all pinned dependencies in a [Nix](https://nixos.org/download.html#nix-quick-install)
-[flake](https://github.com/mschwaig/howto-install-nix-with-flake-support)-based development shell by running
-`nix develop` in the project root (or `nix develop -c zsh` if you don't like bash), and then building the project:
+##### Linux and macOS
+###### Requirements
+Make sure Qt 5.15.2 and CMake are installed and present in your PATH environment variable.
+
+All pinned dependencies can be fetched and present in a
+[Nix](https://nixos.org/download.html#nix-quick-install)
+[flake](https://github.com/mschwaig/howto-install-nix-with-flake-support)-based
+development shell by running `nix develop` in the project root.
+
+###### Compilation
+To compile from source in a Linux environment, clone this project and execute these commands
+in the project root directory:
 ```bash
-cmake . -B build
+cmake . -B build -G'Unix Makefiles'
 cd build
 cmake --build .
 ```
 The compiled executable will be `./Localedit`. Note that depending on the display server (X/Wayland), you may
 require the appropriate Qt libraries installed to run the compiled executable.
+
+To compile from source in a macOS environment (Xcode), clone this project and execute these commands
+in the project root directory:
+```zsh
+cmake . -B build -G'Xcode'
+cd build
+cmake --build .
+```
 

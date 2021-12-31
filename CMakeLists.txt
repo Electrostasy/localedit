@@ -45,6 +45,8 @@ IF(WIN32)
     src/APBFramelessWindow/APBFramelessWindowTitleBar.h
     src/APBFramelessWindow/APBPushButton.cpp
     src/APBFramelessWindow/APBPushButton.h
+    src/APBFramelessWindow/NativeTranslucentFramelessWindow.cpp
+    src/APBFramelessWindow/NativeTranslucentFramelessWindow.h
   )
 ENDIF()
 
