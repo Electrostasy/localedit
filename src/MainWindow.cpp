@@ -45,7 +45,7 @@ MainWindow::MainWindow() {
 	missionListContainer->setLayout(verticalMissionsLayout);
 
 	stages = new StagesEditorWidget();
-	connect(missions, &QListWidget::currentItemChanged, this, [=](QListWidgetItem *currentItem) {
+	connect(missions, &QListWidget::currentItemChanged, this, [stages](QListWidgetItem *currentItem) {
 		// Upcasting from MissionListItem* to QListWidgetItem* on item addition to QListWidget*
 		// Downcasting from QListWidgetItem* to MissionListItem* here on currentItemChanged
 		auto *item = dynamic_cast<MissionListItem *>(currentItem);
@@ -103,23 +103,7 @@ void MainWindow::importFiles() {
 				unsavedChangesBox.setText("You have unsaved changes.");
 				unsavedChangesBox.setStandardButtons(QMessageBox::Save | QMessageBox::Ignore | QMessageBox::Cancel);
 				unsavedChangesBox.setDefaultButton(QMessageBox::Cancel);
-				int ret = unsavedChangesBox.exec();
-				switch(ret) {
-					case QMessageBox::Save:
-						// Save was clicked
-						this->exportFiles();
-						return;
-					case QMessageBox::Ignore:
-						// Ignore was clicked
-						this->openImportFilesDialog();
-						return;
-					case QMessageBox::Cancel:
-						// Cancel was clicked
-						return;
-					default:
-						// should never be reached
-						break;
-				}
+				this->handleUnsavedChangesBox(unsavedChangesBox.exec());
 			}
 		}
 	}
@@ -139,89 +123,19 @@ void MainWindow::openImportFilesDialog() {
 
 		QFile missionTemplates;
 		QFile taskObjectives;
-		QStringList fileNames = dialog.selectedFiles();
-		for(auto const &fileName: fileNames) {
-			// Check if required files are contained in fileNames and trim the path and extension
-			const QString trimmed = verifyAndTrim(fileName);
-
-			if(trimmed == "MissionTemplates") {
-				missionTemplates.setFileName(fileName);
-				if(!missionTemplates.open(QIODevice::ReadOnly | QIODevice::Text)) {
-					return;
-				}
-			}
-
-			if(trimmed == "TaskObjectives") {
-				taskObjectives.setFileName(fileName);
-				if(!taskObjectives.open(QIODevice::ReadOnly | QIODevice::Text)) {
-					return;
-				}
-			}
-		}
-
-		QRegularExpression IDENTIFIERS("MissionTemplates_(?<code>[A-Za-z0-9_]+)_MissionTitle=(?<title>.*)");
-		QRegularExpression STAGE_REGEX("TaskObjectives_(?<code>[A-Za-z0-9_]+?)_(?:Stage\\d\\d_)?(?:(?<special>Opp)_)?(?<side>[A-Za-z]+)=(?<text>.*)");
+		this->verifyFileNames(&dialog, &missionTemplates, &taskObjectives);
 
 		QMap<QString, MissionListItem *> map;
 		QString line;
 
 		// Read mission code and title
 		QTextStream stream(&missionTemplates);
-		while(stream.readLineInto(&line)) {
-			if(line.startsWith(';')) {
-				continue;
-			}
-
-			QString code;
-			QRegularExpressionMatch match = IDENTIFIERS.match(line);
-			if(match.hasMatch()) {
-				code = match.captured("code");
-
-				// If the mission isn't initialized yet, initialize it
-				if(map[code] == nullptr) {
-					map[code] = new MissionListItem();
-				}
-				map[code]->setIdentifiers(match.captured("title"), code);
-			}
-		}
+		this->readMission(&stream, line, &map);
 		missionTemplates.close();
 
 		// Read stages
 		stream.setDevice(&taskObjectives);
-		while(stream.readLineInto(&line)) {
-			// Unlikely to encounter comments, TODO: maybe remove if statement
-			if(line.startsWith(';')) {
-				continue;
-			}
-
-			QRegularExpressionMatch match = STAGE_REGEX.match(line);
-			if(match.hasMatch()) {
-				QString side = match.captured("side");
-				// Some missions have an "Opp" tag on some stages, we flag it as appropriate to avoid displaying it
-				// and then during exporting we copy the data from the equivalent non-Opp stage to it
-				auto *objectives = new QTextDocument(match.captured("text"));
-				bool opp = !match.captured("special").isEmpty();
-				if(opp) {
-					// Clear any text in Opp stages because we duplicate it on export
-					objectives->setPlainText("");
-				}
-				MissionListItem::Stage stage(objectives, opp);
-
-				if(match.hasMatch()) {
-					if(map[match.captured("code")] == nullptr) {
-						map[match.captured("code")] = new MissionListItem();
-					}
-
-					if(side == "OwnerBrief") {
-						map[match.captured("code")]->pushOwnerStage(stage);
-					}
-
-					if(side == "DispatchBrief") {
-						map[match.captured("code")]->pushDispatchStage(stage);
-					}
-				}
-			}
-		}
+		this->readTasks(&stream, line, &map);
 		taskObjectives.close();
 
 		// Build list item widgets
@@ -278,31 +192,8 @@ void MainWindow::exportFiles() {
 			writeInfoHeader(output);
 
 			output << "[TaskObjectives]\n";
-			for(int i = 0; i < missions->count(); ++i) {
-				auto *item = dynamic_cast<MissionListItem *>(missions->item(i));
 
-				// Owner stages gen
-				for(int j = 0; j < item->ownerStages().size(); ++j) {
-					QString stageText = handleStageText(j, item->ownerStages());
-					QString objectives = item->ownerStages()[j].objectives->toPlainText();
-					if(objectives.isEmpty()) {
-						objectives = handleEmptyObjectives(j, item->ownerStages());
-					}
-
-					output << "TaskObjectives_" + item->code() + "_" + stageText + "_OwnerBrief=" + objectives + "\n";
-				}
-
-				// Dispatch stages gen
-				for(int j = 0; j < item->dispatchStages().size(); ++j) {
-					QString stageText = handleStageText(j, item->dispatchStages());
-					QString objectives = item->dispatchStages()[j].objectives->toPlainText();
-					if(objectives.isEmpty()) {
-						objectives = handleEmptyObjectives(j, item->dispatchStages());
-					}
-
-					output << "TaskObjectives_" + item->code() + "_" + stageText + "_DispatchBrief=" + objectives + "\n";
-				}
-			}
+			this->exportMissions(&output);
 			taskObjectives.close();
 		}
 	}
@@ -368,3 +259,132 @@ void MainWindow::paintEvent(QPaintEvent *paintEvent) {
 	QWidget::paintEvent(paintEvent);
 }
 
+void MainWindow::handleUnsavedChangesBox(int action) {
+	switch(ret) {
+		case QMessageBox::Save:
+			// Save was clicked
+			this->exportFiles();
+			return;
+		case QMessageBox::Ignore:
+			// Ignore was clicked
+			this->openImportFilesDialog();
+			return;
+		case QMessageBox::Cancel:
+			// Cancel was clicked
+			return;
+		default:
+			// should never be reached
+			break;
+	}
+}
+
+void MainWindow::readMission(QTextStream &stream, QString line, QMap<QString, MissionListItem *> &map) {
+	QRegularExpression IDENTIFIERS("MissionTemplates_(?<code>[A-Za-z0-9_]+)_MissionTitle=(?<title>.*)");
+
+	while(stream->readLineInto(&line)) {
+		if(line.startsWith(';')) {
+			continue;
+		}
+		QString code;
+		QRegularExpressionMatch match = IDENTIFIERS.match(line);
+		if(match.hasMatch()) {
+			code = match.captured("code");
+
+			// If the mission isn't initialized yet, initialize it
+			if((*map)[code] == nullptr) {
+				(*map)[code] = new MissionListItem();
+			}
+			(*map)[code]->setIdentifiers(match.captured("title"), code);
+		}
+	}
+}
+
+void MainWindow::readTasks(QTextStream &stream, QString line, QMap<QString, MissionListItem *> &map) {
+	QRegularExpression STAGE_REGEX(
+		"TaskObjectives_(?<code>[A-Za-z0-9_]+?)_(?:Stage\\d\\d_)?(?:(?<special>Opp)_)?(?<side>[A-Za-z]+)=(?<text>.*)");
+
+	while(stream->readLineInto(&line)) {
+		// Unlikely to encounter comments, TODO: maybe remove if statement
+		if(line.startsWith(';')) {
+			continue;
+		}
+
+		QRegularExpressionMatch match = STAGE_REGEX.match(line);
+		if(match.hasMatch()) {
+			QString side = match.captured("side");
+			// Some missions have an "Opp" tag on some stages, we flag it as appropriate to avoid displaying it
+			// and then during exporting we copy the data from the equivalent non-Opp stage to it
+			auto *objectives = new QTextDocument(match.captured("text"));
+			bool opp = !match.captured("special").isEmpty();
+			if(opp) {
+				// Clear any text in Opp stages because we duplicate it on export
+				objectives->setPlainText("");
+			}
+			MissionListItem::Stage stage(objectives, opp);
+
+			if(match.hasMatch()) {
+				if((*map)[match.captured("code")] == nullptr) {
+					(*map)[match.captured("code")] = new MissionListItem();
+				}
+
+				if(side == "OwnerBrief") {
+					(*map)[match.captured("code")]->pushOwnerStage(stage);
+				}
+
+				if(side == "DispatchBrief") {
+					(*map)[match.captured("code")]->pushDispatchStage(stage);
+				}
+			}
+		}
+	}
+}
+
+void MainWindow::verifyFileNames(QFileDialog &dialog, QFile &missionTemplates, QFile &tasks) {
+	QStringList fileNames = dialog->selectedFiles();
+	for(auto const &fileName: fileNames) {
+		// Check if required files are contained in fileNames and trim the path and extension
+		const QString trimmed = verifyAndTrim(fileName);
+
+		if(trimmed == "MissionTemplates") {
+			missionTemplates->setFileName(fileName);
+			if(!missionTemplates->open(QIODevice::ReadOnly | QIODevice::Text)) {
+				return;
+			}
+		}
+
+		if(trimmed == "TaskObjectives") {
+			taskObjectives->setFileName(fileName);
+			if(!taskObjectives->open(QIODevice::ReadOnly | QIODevice::Text)) {
+				return;
+			}
+		}
+	}
+}
+
+void MainWindow::exportMissions(QTextStream &output) {
+	for(int i = 0; i < missions->count(); ++i) {
+		auto *item = dynamic_cast<MissionListItem *>(missions->item(i));
+
+		// Owner stages gen
+		for(int j = 0; j < item->ownerStages().size(); ++j) {
+			QString stageText = handleStageText(j, item->ownerStages());
+			QString objectives = item->ownerStages()[j].objectives->toPlainText();
+			if(objectives.isEmpty()) {
+				objectives = handleEmptyObjectives(j, item->ownerStages());
+			}
+
+			(*output) << "TaskObjectives_" + item->code() + "_" + stageText + "_OwnerBrief=" + objectives + "\n";
+		}
+
+		// Dispatch stages gen
+		for(int j = 0; j < item->dispatchStages().size(); ++j) {
+			QString stageText = handleStageText(j, item->dispatchStages());
+			QString objectives = item->dispatchStages()[j].objectives->toPlainText();
+			if(objectives.isEmpty()) {
+				objectives = handleEmptyObjectives(j, item->dispatchStages());
+			}
+
+			(*output) << "TaskObjectives_" + item->code() + "_" + stageText + "_DispatchBrief=" + objectives + "\n";
+		}
+	}
+}

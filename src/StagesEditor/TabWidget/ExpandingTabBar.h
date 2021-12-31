@@ -12,6 +12,8 @@ class ExpandingTabBar: public QTabBar {
 	protected:
 	bool event(QEvent *event) override;
 	void paintEvent(QPaintEvent *paintEvent) override;
+	
+	private:
 	int outerPaintMargin = 4;
 	int mouseoveredTab;
 };
