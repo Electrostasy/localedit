@@ -45,7 +45,7 @@ MainWindow::MainWindow() {
 	missionListContainer->setLayout(verticalMissionsLayout);
 
 	stages = new StagesEditorWidget();
-	connect(missions, &QListWidget::currentItemChanged, this, [stages](QListWidgetItem *currentItem) {
+	connect(missions, &QListWidget::currentItemChanged, this, [*this](QListWidgetItem *currentItem) {
 		// Upcasting from MissionListItem* to QListWidgetItem* on item addition to QListWidget*
 		// Downcasting from QListWidgetItem* to MissionListItem* here on currentItemChanged
 		auto *item = dynamic_cast<MissionListItem *>(currentItem);
@@ -123,7 +123,7 @@ void MainWindow::openImportFilesDialog() {
 
 		QFile missionTemplates;
 		QFile taskObjectives;
-		this->verifyFileNames(&dialog, &missionTemplates, &taskObjectives);
+		this->verifyFileNames(dialog, &missionTemplates, &taskObjectives);
 
 		QMap<QString, MissionListItem *> map;
 		QString line;
@@ -339,7 +339,7 @@ void MainWindow::readTasks(QTextStream &stream, QString line, QMap<QString, Miss
 	}
 }
 
-void MainWindow::verifyFileNames(QFileDialog &dialog, QFile &missionTemplates, QFile &tasks) {
+void MainWindow::verifyFileNames(QFileDialog *dialog, QFile &missionTemplates, QFile &tasks) {
 	QStringList fileNames = dialog->selectedFiles();
 	for(auto const &fileName: fileNames) {
 		// Check if required files are contained in fileNames and trim the path and extension
