@@ -60,6 +60,6 @@ private slots:
 	void readMission(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map);
 	void readTasks(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map);
 	void verifyFileNames(QFileDialog *dialog, QFile *missionTemplates, QFile *tasks);
-	void exportMissions(QTextStream &output);
+	void exportMissions(QTextStream *output);
 };
 

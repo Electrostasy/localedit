@@ -361,7 +361,7 @@ void MainWindow::verifyFileNames(QFileDialog *dialog, QFile *missionTemplates, Q
 	}
 }
 
-void MainWindow::exportMissions(QTextStream &output) {
+void MainWindow::exportMissions(QTextStream *output) {
 	for(int i = 0; i < missions->count(); ++i) {
 		auto *item = dynamic_cast<MissionListItem *>(missions->item(i));
 
