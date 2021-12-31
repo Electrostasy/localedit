@@ -322,19 +322,18 @@ void MainWindow::readTasks(QTextStream *stream, QString line, QMap<QString, Miss
 			}
 			MissionListItem::Stage stage(objectives, opp);
 
-			if(match.hasMatch()) {
-				if((*map)[match.captured("code")] == nullptr) {
-					(*map)[match.captured("code")] = new MissionListItem();
-				}
-
-				if(side == "OwnerBrief") {
-					(*map)[match.captured("code")]->pushOwnerStage(stage);
-				}
-
-				if(side == "DispatchBrief") {
-					(*map)[match.captured("code")]->pushDispatchStage(stage);
-				}
+			if((*map)[match.captured("code")] == nullptr) {
+				(*map)[match.captured("code")] = new MissionListItem();
 			}
+
+			if(side == "OwnerBrief") {
+				(*map)[match.captured("code")]->pushOwnerStage(stage);
+			}
+
+			if(side == "DispatchBrief") {
+				(*map)[match.captured("code")]->pushDispatchStage(stage);
+			}
+			
 		}
 	}
 }
