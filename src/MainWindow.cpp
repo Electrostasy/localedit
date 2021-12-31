@@ -45,7 +45,7 @@ MainWindow::MainWindow() {
 	missionListContainer->setLayout(verticalMissionsLayout);
 
 	stages = new StagesEditorWidget();
-	connect(missions, &QListWidget::currentItemChanged, this, [*stages](QListWidgetItem *currentItem) {
+	connect(missions, &QListWidget::currentItemChanged, this, [*this, *stages](QListWidgetItem *currentItem) {
 		// Upcasting from MissionListItem* to QListWidgetItem* on item addition to QListWidget*
 		// Downcasting from QListWidgetItem* to MissionListItem* here on currentItemChanged
 		auto *item = dynamic_cast<MissionListItem *>(currentItem);
@@ -123,19 +123,19 @@ void MainWindow::openImportFilesDialog() {
 
 		QFile missionTemplates;
 		QFile taskObjectives;
-		this->verifyFileNames(dialog, missionTemplates, taskObjectives);
+		this->verifyFileNames(&dialog, &missionTemplates, &taskObjectives);
 
 		QMap<QString, MissionListItem *> map;
 		QString line;
 
 		// Read mission code and title
 		QTextStream stream(&missionTemplates);
-		this->readMission(stream, line, &map);
+		this->readMission(&stream, line, &map);
 		missionTemplates.close();
 
 		// Read stages
 		stream.setDevice(&taskObjectives);
-		this->readTasks(stream, line, &map);
+		this->readTasks(&stream, line, &map);
 		taskObjectives.close();
 
 		// Build list item widgets
