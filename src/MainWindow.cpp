@@ -278,7 +278,7 @@ void MainWindow::handleUnsavedChangesBox(int action) {
 	}
 }
 
-void MainWindow::readMission(QTextStream *stream, QString line, QMap<QString, MissionListItem *> &map) {
+void MainWindow::readMission(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map) {
 	QRegularExpression IDENTIFIERS("MissionTemplates_(?<code>[A-Za-z0-9_]+)_MissionTitle=(?<title>.*)");
 
 	while(stream->readLineInto(&line)) {
@@ -299,7 +299,7 @@ void MainWindow::readMission(QTextStream *stream, QString line, QMap<QString, Mi
 	}
 }
 
-void MainWindow::readTasks(QTextStream *stream, QString line, QMap<QString, MissionListItem *> &map) {
+void MainWindow::readTasks(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map) {
 	QRegularExpression STAGE_REGEX(
 		"TaskObjectives_(?<code>[A-Za-z0-9_]+?)_(?:Stage\\d\\d_)?(?:(?<special>Opp)_)?(?<side>[A-Za-z]+)=(?<text>.*)");
 
