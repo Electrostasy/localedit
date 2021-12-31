@@ -45,7 +45,7 @@ MainWindow::MainWindow() {
 	missionListContainer->setLayout(verticalMissionsLayout);
 
 	stages = new StagesEditorWidget();
-	connect(missions, &QListWidget::currentItemChanged, this, [*this, *stages](QListWidgetItem *currentItem) {
+	connect(missions, &QListWidget::currentItemChanged, this, [*this](QListWidgetItem *currentItem) {
 		// Upcasting from MissionListItem* to QListWidgetItem* on item addition to QListWidget*
 		// Downcasting from QListWidgetItem* to MissionListItem* here on currentItemChanged
 		auto *item = dynamic_cast<MissionListItem *>(currentItem);
