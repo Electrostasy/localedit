@@ -59,7 +59,7 @@ private slots:
 	void handleUnsavedChangesBox(int action);
 	void readMission(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map);
 	void readTasks(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map);
-	void verifyFileNames(QFileDialog *dialog, QFile *missionTemplates, QFile *tasks);
+	void verifyFileNames(QFileDialog *dialog, QFile *missionTemplates, QFile *taskObjectives);
 	void exportMissions(QTextStream *output);
 };
 
