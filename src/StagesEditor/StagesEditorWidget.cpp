@@ -68,7 +68,7 @@ void StagesEditorWidget::buildStages(QWidget *page, const QVector<MissionListIte
 
 		// If there are undo steps remaining, that means the mission currently being edited needs to be marked as
 		// having been modified, and if not - cleared of being marked modified
-		connect(textField, &QPlainTextEdit::textChanged, this, [currentItem]() {
+		connect(textField, &QPlainTextEdit::textChanged, this, [currentItem, textField]() {
 			if(textField->document()->availableUndoSteps() > 0) {
 				currentItem->setData(Qt::ItemDataRole::DecorationRole, QIcon(":/resources/pending_changes"));
 			} else {
