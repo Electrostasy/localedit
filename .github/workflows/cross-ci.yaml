@@ -1,12 +1,28 @@
 name: CI Build
 
-on: 
+on:
   push:
   pull_request:
-    types: [opened]
-
+    types: [opened, reopened, synchronize, ready_for_review]
 jobs:
+  skip-duplicate-actions:
+    name: Skip duplicate actions
+    runs-on: ubuntu-latest
+    outputs:
+      should-skip: ${{ steps.skip-check.outputs.should_skip }}
+
+    steps:
+      - id: skip-check
+        name: Check if workflow is not already running
+        uses: fkirc/skip-duplicate-actions@v3.4.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          concurrent_skipping: "same_content"
+          do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
+          
   build:
+    needs: skip-duplicate-actions
+    if: ${{ needs.skip-duplicate-actions.outputs.should-skip != 'true' }}
     strategy:
       fail-fast: false
       matrix:
