@@ -5,11 +5,11 @@ MainWindow::MainWindow() {
 
 	// Create import/export buttons
 	auto horizontalButtonLayout = new QHBoxLayout();
-	importButton = new PushButtonBase("Import");
-	exportButton = new PushButtonBase("Export");
+	importButton = new APBPushButton("Import");
+	exportButton = new APBPushButton("Export");
 	exportButton->setDisabled(true);
-	connect(importButton, &PushButtonBase::released, this, &MainWindow::openImportFilesDialog);
-	connect(exportButton, &PushButtonBase::released, this, &MainWindow::exportFiles);
+	connect(importButton, &APBPushButton::released, this, &MainWindow::openImportFilesDialog);
+	connect(exportButton, &APBPushButton::released, this, &MainWindow::exportFiles);
 	horizontalButtonLayout->addWidget(importButton);
 	horizontalButtonLayout->addWidget(exportButton);
 	horizontalButtonLayout->setMargin(0);

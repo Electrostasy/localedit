@@ -45,7 +45,7 @@ void ExpandingTabBar::paintEvent(QPaintEvent *paintEvent) {
 
 		// Draw text on tab
 		if(!this->tabText(index).isEmpty()) {
-			this->restorePen(pen, index);
+			this->restorePen(painter, pen, index);
 
 			QRect boundingRect;
 			painter->drawText(tabRect.x() + outerPaintMargin, tabRect.y() + outerPaintMargin,
@@ -80,10 +80,11 @@ QRect ExpandingTabBar::createTabRect(int index) {
 	return tabRect;
 }
 
-void ExpandingTabBar::restorePen(QPen pen, int index) {
+void ExpandingTabBar::restorePen(QPainter* painter, QPen pen, int index) {
 	// Restore pen to draw text
 	pen.setStyle(Qt::PenStyle::SolidLine);
 	auto penColor =
 		index == this->currentIndex() ? this->palette().highlightedText().color() : this->palette().text().color();
 	pen.setColor(penColor);
+  painter->setPen(pen);
 }

@@ -59,7 +59,6 @@ bool APBPushButton::event(QEvent *event) {
 					this->stopTimer(&palette);
 				}
 				this->setHighlight(&palette);
-				emit this->pressed();
 			}
 
 			break;
@@ -70,7 +69,6 @@ bool APBPushButton::event(QEvent *event) {
 					this->stopTimer(&palette);
 				}
 				this->setHighlight(&palette);
-				emit this->clicked();
 			}
 
 			break;
@@ -81,13 +79,14 @@ bool APBPushButton::event(QEvent *event) {
 				if(this->timer != nullptr) {
 					this->startTimer(&palette);
 				}
-				emit this->released();
 			}
 
 			break;
-		default:
-			return QPushButton::event(event);
+
+    default: {} // Other events are not handled by this switch-statement
 	}
+
+	return QPushButton::event(event);
 }
 
 void APBPushButton::setButtonColour(const QColor &colour) {
@@ -176,7 +175,7 @@ void APBPushButton::paintEvent(QPaintEvent *event) {
 
 	this->setPen(painter);
 
-	auto [outer, inner] = this->drawBox();
+	auto [outer, inner] = this->drawBox(event);
 
 	painter->drawPolygon(outer);
 	painter->setBrush(this->createGradient(inner));
@@ -284,7 +283,7 @@ void APBPushButton::setTitleIcon(TitleIcon icon) {
 	this->titleBarIconType = icon;
 }
 
-std::tuple<QRect, QRect> APBPushButton::drawBox() {
+std::tuple<QRect, QRect> APBPushButton::drawBox(QPaintEvent* event) {
 	// Draw outer box
 	QRect outer = event->rect();
 	// Draw inner box
@@ -293,7 +292,7 @@ std::tuple<QRect, QRect> APBPushButton::drawBox() {
 
 	return {
 		outer, inner
-	}
+	};
 }
 
 void APBPushButton::setPen(QPainter *painter) {
@@ -330,19 +329,19 @@ QLinearGradient APBPushButton::createGradient(const QRect &inner) {
 void APBPushButton::drawTitleBarIcon(QPainter *painter, const QRect &bounds) {
 	switch(this->titleBarIconType) {
 		case TitleIcon::None:
-			this->drawText(painter, inner);
+			this->drawText(painter, bounds);
 			break;
 		case TitleIcon::Minimize:
-			this->drawTitleBarMinimize(painter, inner);
+			this->drawTitleBarMinimize(painter, bounds);
 			break;
 		case TitleIcon::Maximize:
-			this->drawTitleBarMaximize(painter, inner);
+			this->drawTitleBarMaximize(painter, bounds);
 			break;
 		case TitleIcon::Restore:
-			this->drawTitleBarMaximize(painter, inner);
+			this->drawTitleBarMaximize(painter, bounds);
 			break;
 		case TitleIcon::Close:
-			this->drawTitleBarClose(painter, inner);
+			this->drawTitleBarClose(painter, bounds);
 			break;
 	}
 }
