@@ -56,7 +56,7 @@ class MainWindow: public MainWindowBase {
 	private slots:
 	void importFiles();
 	void exportFiles();
-	void handleUnsavedChangesBox(int action);
+	void handleUnsavedChangesBox();
 	void readMission(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map) const;
 	void readTasks(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map) const;
 	void verifyFileNames(QFileDialog const *dialog, QFile *missionTemplates, QFile *taskObjectives) const;

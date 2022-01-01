@@ -98,12 +98,7 @@ void MainWindow::importFiles() {
 		for(int i = 0; i < missions->count(); ++i) {
 			auto *item = missions->item(0);
 			if(!item->data(Qt::ItemDataRole::DecorationRole).value<QIcon>().isNull()) {
-				QMessageBox unsavedChangesBox;
-				unsavedChangesBox.setWindowTitle(this->applicationName);
-				unsavedChangesBox.setText("You have unsaved changes.");
-				unsavedChangesBox.setStandardButtons(QMessageBox::Save | QMessageBox::Ignore | QMessageBox::Cancel);
-				unsavedChangesBox.setDefaultButton(QMessageBox::Cancel);
-				this->handleUnsavedChangesBox(unsavedChangesBox.exec());
+				this->handleUnsavedChangesBox();
 			}
 		}
 	}
@@ -259,7 +254,14 @@ void MainWindow::paintEvent(QPaintEvent *paintEvent) {
 	QWidget::paintEvent(paintEvent);
 }
 
-void MainWindow::handleUnsavedChangesBox(int action) {
+void MainWindow::handleUnsavedChangesBox() {
+	QMessageBox unsavedChangesBox;
+	unsavedChangesBox.setWindowTitle(this->applicationName);
+	unsavedChangesBox.setText("You have unsaved changes.");
+	unsavedChangesBox.setStandardButtons(QMessageBox::Save | QMessageBox::Ignore | QMessageBox::Cancel);
+	unsavedChangesBox.setDefaultButton(QMessageBox::Cancel);
+	int action = unsavedChangesBox.exec();
+
 	switch(action) {
 		case QMessageBox::Save:
 			// Save was clicked
