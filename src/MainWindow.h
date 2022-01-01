@@ -2,6 +2,7 @@
 
 #include <QtWidgets>
 
+#include "APBFramelessWindow/APBPushButton.h"
 #include "MissionList/MissionListItem.h"
 #include "MissionList/MissionListWidget.h"
 #include "StagesEditor/StagesEditorWidget.h"
@@ -10,10 +11,8 @@
 // base classes for the main window and buttons at compile time
 #if defined(_WIN64)
 #include "APBFramelessWindow/NativeTranslucentFramelessWindow.h"
-#include "APBFramelessWindow/APBPushButton.h"
 namespace {
   typedef NativeTranslucentFramelessWindow MainWindowBase;
-  typedef APBPushButton PushButtonBase;
 }
 #elif defined(__linux__) || defined(__MACH__)
 // The Linux/MacOS builds do not support all the UI customizations of the
@@ -21,7 +20,6 @@ namespace {
 // standardized ways to override the client-side decorations
 namespace {
   typedef QWidget MainWindowBase;
-  typedef QPushButton PushButtonBase;
 }
 #endif
 
@@ -40,8 +38,8 @@ protected:
 
 private:
 	const QString applicationName = "Localedit";
-	PushButtonBase *importButton;
-	PushButtonBase *exportButton;
+	APBPushButton *importButton;
+	APBPushButton *exportButton;
 	QLineEdit *search;
 	QCheckBox *nameIdSwitch;
 	MissionListWidget *missions;

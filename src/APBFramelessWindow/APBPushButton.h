@@ -60,7 +60,7 @@ class APBPushButton: public QPushButton {
 	// Element creation
 	QLinearGradient createGradient(const QRect &inner);
 	void setPen(QPainter *painter);
-	std::tuple<QRect, QRect> drawBox();
+	std::tuple<QRect, QRect> drawBox(QPaintEvent* event);
 
 	private slots:
 	// Called whenever QTimeLine is running to lighten and darken button palette
