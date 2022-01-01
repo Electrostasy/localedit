@@ -112,6 +112,7 @@ void MainWindow::openImportFilesDialog() {
 	dialog.setViewMode(QFileDialog::ViewMode::List);
 
 	if(dialog.exec()) {
+    // Clear any existing missions
 		if(missions->count() > 0) {
 			missions->clear();
 		}
@@ -233,13 +234,6 @@ void MainWindow::writeInfoHeader(QTextStream &stream) {
 	stream << "; Steam:   https://steamcommunity.com/id/cactupia/\n";
 	stream << "; Discord: cactus#7333\n";
 	stream << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n";
-}
-
-QString MainWindow::verifyAndTrim(const QString &fileName) {
-	QRegularExpression rx("(?:BRA|FRA|GER|INT|ITA|RUS|SPA)\\/(?<fileName>\\w+)");
-	QRegularExpressionMatch match = rx.match(fileName);
-
-	return match.captured("fileName");
 }
 
 // Tint the background colour of the window

@@ -1,4 +1,5 @@
 #include "APBPushButton.h"
+#include <tuple>
 
 APBPushButton::APBPushButton(QWidget *parent): QPushButton(parent) {
 	buttonFont.setStyleHint(QFont::StyleHint::Helvetica, QFont::StyleStrategy::PreferAntialias);
@@ -177,69 +178,17 @@ void APBPushButton::paintEvent(QPaintEvent *event) {
 	auto *painter = new QPainter(this);
 	painter->setFont(this->buttonFont);
 	painter->setRenderHints(QPainter::Antialiasing, QPainter::TextAntialiasing);
-
-	// Remove borders
-	QPen pen = painter->pen();
-	pen.setStyle(Qt::PenStyle::NoPen);
-	painter->setPen(pen);
-
-	// Draw outer box
-	QRect outer = event->rect();
 	painter->setBrush(this->palette().highlight());
+
+	this->setPen(painter);
+
+	auto [outer, inner] = this->drawBox();
+
 	painter->drawPolygon(outer);
-
-	// Draw inner box
-	QRect inner = QRect(
-		QPoint(outer.left() + this->outerPaintMargin, outer.top() + this->outerPaintMargin),
-	    QPoint(outer.right() - this->outerPaintMargin, outer.bottom() - this->outerPaintMargin)
-	);
-
-	QColor brightestColour = this->palette().button().color();
-	QLinearGradient gradient(
-		QPoint(inner.center().x(), inner.top()),
-		QPoint(inner.center().x(), inner.bottom())
-	);
-
-	// Top (brighter) half
-	gradient.setColorAt(0.000, brightestColour);
-	gradient.setColorAt(0.200, brightestColour.darker(110));
-	gradient.setColorAt(0.350, brightestColour.darker(130));
-	gradient.setColorAt(0.400, brightestColour.darker(125));
-	gradient.setColorAt(0.500, brightestColour.darker(150));
-
-	// Bottom (darker) half
-	gradient.setColorAt(0.600, brightestColour.darker(200));
-	gradient.setColorAt(0.650, brightestColour.darker(170));
-	gradient.setColorAt(0.750, brightestColour.darker(175));
-	gradient.setColorAt(0.900, brightestColour.darker(215));
-	gradient.setColorAt(1.000, brightestColour.darker(178));
-
-	painter->setBrush(gradient);
+	painter->setBrush(this->createGradient(inner));
 	painter->drawPolygon(inner);
 
-	pen.setBrush(this->palette().buttonText());
-	pen.setStyle(Qt::PenStyle::SolidLine);
-	pen.setJoinStyle(Qt::PenJoinStyle::MiterJoin);
-	painter->setPen(pen);
-
-	// Draw title bar icons if they exist, otherwise draw text or icon+text
-	switch(this->titleIcon()) {
-		case TitleIcon::None:
-			this->drawText(painter, inner);
-			break;
-		case TitleIcon::Minimize:
-			this->drawTitleBarMinimize(painter, inner);
-			break;
-		case TitleIcon::Maximize:
-			this->drawTitleBarMaximize(painter, inner);
-			break;
-		case TitleIcon::Restore:
-			this->drawTitleBarMaximize(painter, inner);
-			break;
-		case TitleIcon::Close:
-			this->drawTitleBarClose(painter, inner);
-			break;
-	}
+	this->drawTitleBarIcon(painter, inner);
 
 	painter->end();
 }
@@ -341,10 +290,65 @@ void APBPushButton::setTitleIcon(TitleIcon icon) {
 	this->titleBarIconType = icon;
 }
 
-APBPushButton::TitleIcon APBPushButton::titleIcon() {
-	return this->titleBarIconType;
+std::tuple<QRect, QRect> APBPushButton::drawBox() {
+	// Draw outer box
+	QRect outer = event->rect();
+	// Draw inner box
+	QRect inner = QRect(QPoint(outer.left() + this->outerPaintMargin, outer.top() + this->outerPaintMargin),
+		QPoint(outer.right() - this->outerPaintMargin, outer.bottom() - this->outerPaintMargin));
+
+	return {
+		outer, inner
+	}
 }
 
+void APBPushButton::setPen(QPainter *painter) {
+	QPen pen = painter->pen();
+	pen.setStyle(Qt::PenStyle::NoPen);	  // Remove borders
+	painter->setPen(pen);
+	pen.setBrush(this->palette().buttonText());
+	pen.setStyle(Qt::PenStyle::SolidLine);
+	pen.setJoinStyle(Qt::PenJoinStyle::MiterJoin);
+	painter->setPen(pen);
+}
 
+QLinearGradient APBPushButton::createGradient(const QRect &inner) {
+	QColor brightestColour = this->palette().button().color();
+	QLinearGradient gradient(QPoint(inner.center().x(), inner.top()), QPoint(inner.center().x(), inner.bottom()));
 
+	// Top (brighter) half
+	gradient.setColorAt(0.000, brightestColour);
+	gradient.setColorAt(0.200, brightestColour.darker(110));
+	gradient.setColorAt(0.350, brightestColour.darker(130));
+	gradient.setColorAt(0.400, brightestColour.darker(125));
+	gradient.setColorAt(0.500, brightestColour.darker(150));
 
+	// Bottom (darker) half
+	gradient.setColorAt(0.600, brightestColour.darker(200));
+	gradient.setColorAt(0.650, brightestColour.darker(170));
+	gradient.setColorAt(0.750, brightestColour.darker(175));
+	gradient.setColorAt(0.900, brightestColour.darker(215));
+	gradient.setColorAt(1.000, brightestColour.darker(178));
+
+	return gradient;
+}
+
+void APBPushButton::drawTitleBarIcon(QPainter *painter, const QRect &bounds) {
+	switch(this->titleBarIconType) {
+		case TitleIcon::None:
+			this->drawText(painter, inner);
+			break;
+		case TitleIcon::Minimize:
+			this->drawTitleBarMinimize(painter, inner);
+			break;
+		case TitleIcon::Maximize:
+			this->drawTitleBarMaximize(painter, inner);
+			break;
+		case TitleIcon::Restore:
+			this->drawTitleBarMaximize(painter, inner);
+			break;
+		case TitleIcon::Close:
+			this->drawTitleBarClose(painter, inner);
+			break;
+	}
+}

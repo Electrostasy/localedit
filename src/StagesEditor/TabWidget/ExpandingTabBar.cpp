@@ -20,20 +20,16 @@ ExpandingTabBar::ExpandingTabBar(QWidget *parent): QTabBar(parent) {
 }
 
 bool ExpandingTabBar::event(QEvent *event) {
-	QPalette palette = this->palette();
-	switch(event->type()) {
-		case QEvent::MouseMove:
-			// Keep track of which tab has mouseover for PaintEvent
-			mouseoveredTab = this->tabAt(dynamic_cast<QMouseEvent *>(event)->pos());
-			break;
-		case QEvent::HoverLeave:
-			// MouseMove can't detect if we left the tab bar, so we use HoverLeave
-			mouseoveredTab = -1;
-			this->update();
-			break;
-		default:
-			return QTabBar::event(event);
-	}
+  if (event->type() == QEvent::MouseMove) {
+		// Keep track of which tab has mouseover for PaintEvent
+		mouseoveredTab = this->tabAt(dynamic_cast<QMouseEvent *>(event)->pos());
+  } else if (event->type() == QEvent::HoverLeave) {
+		// MouseMove can't detect if we left the tab bar, so we use HoverLeave
+		mouseoveredTab = -1;
+		this->update();
+  }
+
+	return QTabBar::event(event);
 }
 
 void ExpandingTabBar::paintEvent(QPaintEvent *paintEvent) {
@@ -41,50 +37,53 @@ void ExpandingTabBar::paintEvent(QPaintEvent *paintEvent) {
 	QPen pen = painter->pen();
 
 	for(int index = 0; index < this->count(); ++index) {
-		if(index == this->currentIndex()) {
-			painter->setBrush(this->palette().highlight());
-		} else {
-			// If current tab is under mouse, make it brighter
-			if(index == mouseoveredTab) {
-				painter->setBrush(this->palette().alternateBase());
-			} else {
-				painter->setBrush(this->palette().base());
-			}
-		}
+		this->setBrush(painter, index);
 
-		// Create gaps between tabs that aren't the first or last tab
-		int leftMargin = index != 0 ? outerPaintMargin / 2 : 0;
-		int rightMargin = index != this->count() - 1 ? outerPaintMargin / 2 : 0;
-		QRect tabRect = QRect(
-			this->tabRect(index).left() + leftMargin,
-			this->tabRect(index).top(),
-			this->tabRect(index).width() - rightMargin,
-			this->tabRect(index).height()
-		);
-		// Remove borders by setting to no pen
-		painter->setPen(Qt::PenStyle::NoPen);
+		QRect tabRect = this->createTabRect(index);
+		painter->setPen(Qt::PenStyle::NoPen);	 // Remove borders by setting to no pen
 		painter->drawRect(tabRect);
 
 		// Draw text on tab
 		if(!this->tabText(index).isEmpty()) {
-			// Restore pen to draw text
-			pen.setStyle(Qt::PenStyle::SolidLine);
-			if(index == this->currentIndex()) {
-				pen.setColor(this->palette().highlightedText().color());
-			} else {
-				pen.setColor(this->palette().text().color());
-			}
-			painter->setPen(pen);
+			this->restorePen(pen, index);
 
 			QRect boundingRect;
-			painter->drawText(
-				tabRect.x() + outerPaintMargin, tabRect.y() + outerPaintMargin,
-				tabRect.width() - outerPaintMargin, tabRect.height() - outerPaintMargin,
-				Qt::AlignmentFlag::AlignLeft, this->tabText(index),
-				&boundingRect
-			);
+			painter->drawText(tabRect.x() + outerPaintMargin, tabRect.y() + outerPaintMargin,
+				tabRect.width() - outerPaintMargin, tabRect.height() - outerPaintMargin, Qt::AlignmentFlag::AlignLeft,
+				this->tabText(index), &boundingRect);
 		}
 	}
 
 	painter->end();
+}
+
+void ExpandingTabBar::setBrush(QPainter* painter, int index) {
+	if(index == this->currentIndex()) {
+		painter->setBrush(this->palette().highlight());
+	} else {
+		// If current tab is under mouse, make it brighter
+		if(index == mouseoveredTab) {
+			painter->setBrush(this->palette().alternateBase());
+		} else {
+			painter->setBrush(this->palette().base());
+		}
+	}
+}
+
+QRect ExpandingTabBar::createTabRect(int index) {
+	// Create gaps between tabs that aren't the first or last tab
+	int leftMargin = index != 0 ? outerPaintMargin / 2 : 0;
+	int rightMargin = index != this->count() - 1 ? outerPaintMargin / 2 : 0;
+	QRect tabRect = QRect(this->tabRect(index).left() + leftMargin, this->tabRect(index).top(),
+		this->tabRect(index).width() - rightMargin, this->tabRect(index).height());
+
+	return tabRect;
+}
+
+void ExpandingTabBar::restorePen(QPen pen, int index) {
+	// Restore pen to draw text
+	pen.setStyle(Qt::PenStyle::SolidLine);
+	auto penColor =
+		index == this->currentIndex() ? this->palette().highlightedText().color() : this->palette().text().color();
+	pen.setColor(penColor);
 }
