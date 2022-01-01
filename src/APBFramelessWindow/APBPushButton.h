@@ -55,6 +55,12 @@ class APBPushButton: public QPushButton {
 	void drawTitleBarMinimize(QPainter *painter, const QRect &bounds);
 	void drawTitleBarMaximize(QPainter *painter, const QRect &bounds);
 	void drawTitleBarClose(QPainter *painter, const QRect &bounds);
+	void drawTitleBarIcon(QPainter *painter, const QRect &bounds);
+
+	// Element creation
+	QLinearGradient createGradient(const QRect &inner);
+	void setPen(QPainter *painter);
+	std::tuple<QRect, QRect> drawBox();
 
 	private slots:
 	// Called whenever QTimeLine is running to lighten and darken button palette
