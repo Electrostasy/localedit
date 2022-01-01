@@ -58,9 +58,7 @@ bool APBPushButton::event(QEvent *event) {
 				if(this->timer != nullptr) {
 					this->stopTimer(&palette);
 				}
-
 				this->setHighlight(&palette);
-
 				emit this->pressed();
 			}
 
@@ -71,9 +69,7 @@ bool APBPushButton::event(QEvent *event) {
 				if(this->timer != nullptr) {
 					this->stopTimer(&palette);
 				}
-
 				this->setHighlight(&palette);
-
 				emit this->clicked();
 			}
 
@@ -81,12 +77,10 @@ bool APBPushButton::event(QEvent *event) {
 		case QEvent::MouseButtonRelease:
 			if(this->isEnabled()) {
 				this->restoreDefaults(&palette);
-
 				// If a QTimeLine object exists, start the blink timer instead of reverting to static colour
 				if(this->timer != nullptr) {
 					this->startTimer(&palette);
 				}
-
 				emit this->released();
 			}
 

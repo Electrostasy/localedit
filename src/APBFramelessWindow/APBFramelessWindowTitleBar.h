@@ -9,7 +9,7 @@ class APBFramelessWindowTitleBar: public QWidget {
 
 	public:
 	explicit APBFramelessWindowTitleBar(QWidget *parent = nullptr);
-	[[nodiscard]] int buttonsWidth() const;
+	[[nodiscard]] int buttonWidth() const;
 	[[nodiscard]] int labelWidth() const;
 	void setTitleBarText(const QString &text);
 	QLabel *titleBarLabel();
@@ -25,7 +25,6 @@ class APBFramelessWindowTitleBar: public QWidget {
 
 	private:
 	QLabel *windowTitle;
-
 	APBPushButton *minimizeButton;
 	APBPushButton *restoreButton;
 	APBPushButton *maximizeButton;

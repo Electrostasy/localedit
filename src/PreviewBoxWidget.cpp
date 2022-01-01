@@ -26,7 +26,6 @@ PreviewBoxWidget::PreviewBoxWidget(QWidget *parent): QWidget(parent) {
 	missionText->setReadOnly(true);
 	missionText->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
 	missionText->setWordWrapMode(QTextOption::WrapMode::WordWrap);
-	// missionText->setLineWrapMode(QPlainTextEdit::LineWrapMode::WidgetWidth);
 
 	auto footer = new QWidget();
 	auto footerLabel = new QLabel();
@@ -49,9 +48,6 @@ PreviewBoxWidget::PreviewBoxWidget(QWidget *parent): QWidget(parent) {
 
 	// Calculate optimal sizes for screen
 	auto font = missionName->font();
-	// font.setPointSizeF(font.pointSize() * 0.845);
-	// missionName->setFont(font);
-	// timer->setFont(font);
 
 	// 0.845 is the "ratio" that everything scales with
 	auto fontSize = font.pointSize() * 0.845;
@@ -64,11 +60,9 @@ PreviewBoxWidget::PreviewBoxWidget(QWidget *parent): QWidget(parent) {
 
 	this->setFixedHeight(qFloor(103 / ratio));
 	header->setFixedHeight(qFloor(18 / ratio));
-	// missionText->setFixedHeight(qFloor(61 / ratio));
 	footer->setFixedHeight(qFloor(24 / ratio));
 
 	headerLayout->setContentsMargins(5 / 0.845, 3 / 0.845, 5 / 0.845, 4 / 0.845);
-	// missionTextContainer->setContentsMargins(4 / 0.845, 3 / 0.845, 4 / 0.845, 6 / 0.845);
 
 	layout->addWidget(header);
 	layout->addWidget(missionText);

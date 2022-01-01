@@ -59,12 +59,11 @@ void APBFramelessWindowTitleBar::paintEvent(QPaintEvent *paintEvent) {
 	QWidget::paintEvent(paintEvent);
 }
 
-int APBFramelessWindowTitleBar::buttonsWidth() const {
+int APBFramelessWindowTitleBar::buttonWidth() const {
 	const int minimizeButtonWidth = this->minimizeButton->isVisible() ? this->minimizeButton->width() : 0;
 	const int restoreButtonWidth = this->restoreButton->isVisible() ? this->minimizeButton->width() : 0;
 	const int maximizeButtonWidth = this->maximizeButton->isVisible() ? this->minimizeButton->width() : 0;
 	const int closeButtonWidth = this->closeButton->isVisible() ? this->minimizeButton->width() : 0;
-
 	return minimizeButtonWidth + restoreButtonWidth + maximizeButtonWidth + closeButtonWidth;
 }
 
