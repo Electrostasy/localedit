@@ -20,20 +20,16 @@ ExpandingTabBar::ExpandingTabBar(QWidget *parent): QTabBar(parent) {
 }
 
 bool ExpandingTabBar::event(QEvent *event) {
-	QPalette palette = this->palette();
-	switch(event->type()) {
-		case QEvent::MouseMove:
-			// Keep track of which tab has mouseover for PaintEvent
-			mouseoveredTab = this->tabAt(dynamic_cast<QMouseEvent *>(event)->pos());
-			break;
-		case QEvent::HoverLeave:
-			// MouseMove can't detect if we left the tab bar, so we use HoverLeave
-			mouseoveredTab = -1;
-			this->update();
-			break;
-		default:
-			return QTabBar::event(event);
-	}
+  if (event->type() == QEvent::MouseMove) {
+		// Keep track of which tab has mouseover for PaintEvent
+		mouseoveredTab = this->tabAt(dynamic_cast<QMouseEvent *>(event)->pos());
+  } else if (event->type() == QEvent::HoverLeave) {
+		// MouseMove can't detect if we left the tab bar, so we use HoverLeave
+		mouseoveredTab = -1;
+		this->update();
+  }
+
+	return QTabBar::event(event);
 }
 
 void ExpandingTabBar::paintEvent(QPaintEvent *paintEvent) {
