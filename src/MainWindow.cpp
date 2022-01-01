@@ -278,7 +278,7 @@ void MainWindow::handleUnsavedChangesBox(int action) {
 	}
 }
 
-void MainWindow::readMission(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map) {
+void MainWindow::readMission(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map) const {
 	QRegularExpression IDENTIFIERS("MissionTemplates_(?<code>[A-Za-z0-9_]+)_MissionTitle=(?<title>.*)");
 
 	while(stream->readLineInto(&line)) {
@@ -299,7 +299,7 @@ void MainWindow::readMission(QTextStream *stream, QString line, QMap<QString, Mi
 	}
 }
 
-void MainWindow::readTasks(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map) {
+void MainWindow::readTasks(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map) const {
 	QRegularExpression STAGE_REGEX(
 		"TaskObjectives_(?<code>[A-Za-z0-9_]+?)_(?:Stage\\d\\d_)?(?:(?<special>Opp)_)?(?<side>[A-Za-z]+)=(?<text>.*)");
 
@@ -338,7 +338,7 @@ void MainWindow::readTasks(QTextStream *stream, QString line, QMap<QString, Miss
 	}
 }
 
-void MainWindow::verifyFileNames(QFileDialog *dialog, QFile *missionTemplates, QFile *taskObjectives) {
+void MainWindow::verifyFileNames(QFileDialog const *dialog, QFile *missionTemplates, QFile *taskObjectives) const {
 	QStringList fileNames = dialog->selectedFiles();
 	for(auto const &fileName: fileNames) {
 		// Check if required files are contained in fileNames and trim the path and extension
@@ -360,7 +360,7 @@ void MainWindow::verifyFileNames(QFileDialog *dialog, QFile *missionTemplates, Q
 	}
 }
 
-void MainWindow::exportMissions(QTextStream *output) {
+void MainWindow::exportMissions(QTextStream *output) const {
 	for(int i = 0; i < missions->count(); ++i) {
 		auto *item = dynamic_cast<MissionListItem *>(missions->item(i));
 
