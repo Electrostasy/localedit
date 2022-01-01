@@ -236,6 +236,12 @@ void MainWindow::writeInfoHeader(QTextStream &stream) {
 	stream << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n";
 }
 
+QString MainWindow::verifyAndTrim(const QString &fileName) {
+	QRegularExpression rx("(?:BRA|FRA|GER|INT|ITA|RUS|SPA)\\/(?<fileName>\\w+)");
+	QRegularExpressionMatch match = rx.match(fileName);
+	return match.captured("fileName");
+}
+
 // Tint the background colour of the window
 void MainWindow::paintEvent(QPaintEvent *paintEvent) {
 	auto *painter = new QPainter(this);
