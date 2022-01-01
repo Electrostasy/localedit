@@ -47,7 +47,6 @@ private:
 	MissionListWidget *missions;
 	StagesEditorWidget *stages;
 
-	static QString verifyAndTrim(const QString &fileName);
 	void openImportFilesDialog();
 	static void writeInfoHeader(QTextStream &stream);
 	static QString handleStageText(const int &index, const QVector<MissionListItem::Stage> &stages);
