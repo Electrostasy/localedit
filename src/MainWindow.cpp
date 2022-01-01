@@ -133,26 +133,32 @@ void MainWindow::openImportFilesDialog() {
 	dialog.setViewMode(QFileDialog::ViewMode::List);
 
 	if(dialog.exec()) {
+    // Clear any existing missions
 		if(missions->count() > 0) {
 			missions->clear();
 		}
 
 		QFile missionTemplates;
 		QFile taskObjectives;
-		QStringList fileNames = dialog.selectedFiles();
-		for(auto const &fileName: fileNames) {
-			// Check if required files are contained in fileNames and trim the path and extension
-			const QString trimmed = verifyAndTrim(fileName);
+		for(auto const &file: dialog.selectedFiles()) {
+      const auto fileInfo = QFileInfo(file);
+      const auto fileName = fileInfo.fileName();
+      const auto filePath = fileInfo.absoluteFilePath();
 
-			if(trimmed == "MissionTemplates") {
-				missionTemplates.setFileName(fileName);
+      if (!QDir::match({ "*.INT", "*.GER", "*.ITA", "*.RUS", "*.SPA", "*.FRA", "*.BRA" }, fileName)) {
+        break;
+      }
+      
+      // Open the files needed to edit mission stages text
+			if(fileName.startsWith("MissionTemplates")) {
+				missionTemplates.setFileName(filePath);
 				if(!missionTemplates.open(QIODevice::ReadOnly | QIODevice::Text)) {
 					return;
 				}
 			}
 
-			if(trimmed == "TaskObjectives") {
-				taskObjectives.setFileName(fileName);
+			if(fileName.startsWith("TaskObjectives")) {
+				taskObjectives.setFileName(filePath);
 				if(!taskObjectives.open(QIODevice::ReadOnly | QIODevice::Text)) {
 					return;
 				}
@@ -347,13 +353,6 @@ void MainWindow::writeInfoHeader(QTextStream &stream) {
 	stream << "; Steam:   https://steamcommunity.com/id/cactupia/\n";
 	stream << "; Discord: cactus#7333\n";
 	stream << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n";
-}
-
-QString MainWindow::verifyAndTrim(const QString &fileName) {
-	QRegularExpression rx("(?:BRA|FRA|GER|INT|ITA|RUS|SPA)\\/(?<fileName>\\w+)");
-	QRegularExpressionMatch match = rx.match(fileName);
-
-	return match.captured("fileName");
 }
 
 // Tint the background colour of the window
