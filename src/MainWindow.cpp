@@ -255,12 +255,7 @@ void MainWindow::paintEvent(QPaintEvent *paintEvent) {
 }
 
 void MainWindow::handleUnsavedChangesBox() {
-	QMessageBox unsavedChangesBox;
-	unsavedChangesBox.setWindowTitle(this->applicationName);
-	unsavedChangesBox.setText("You have unsaved changes.");
-	unsavedChangesBox.setStandardButtons(QMessageBox::Save | QMessageBox::Ignore | QMessageBox::Cancel);
-	unsavedChangesBox.setDefaultButton(QMessageBox::Cancel);
-	int action = unsavedChangesBox.exec();
+	int action = MessageBox::UnsavedChangesBox(this->applicationName).exec();
 
 	switch(action) {
 		case QMessageBox::Save:

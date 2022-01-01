@@ -2,6 +2,7 @@
 
 #include <QtWidgets>
 
+#include "Components/MessageBox.h"
 #include "MissionList/MissionListItem.h"
 #include "MissionList/MissionListWidget.h"
 #include "StagesEditor/StagesEditorWidget.h"
