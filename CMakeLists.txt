@@ -15,6 +15,8 @@ set(CMAKE_AUTORCC ON)
 add_executable(${PROJECT_NAME} src/main.cpp)
 
 target_sources(${PROJECT_NAME} PRIVATE
+  src/APBFramelessWindow/APBPushButton.cpp
+  src/APBFramelessWindow/APBPushButton.h
   src/MainWindow.cpp
   src/MainWindow.h
   src/MissionList/MissionListItem.cpp
@@ -43,8 +45,6 @@ IF(WIN32)
   target_sources(${PROJECT_NAME} PRIVATE
     src/APBFramelessWindow/APBFramelessWindowTitleBar.cpp
     src/APBFramelessWindow/APBFramelessWindowTitleBar.h
-    src/APBFramelessWindow/APBPushButton.cpp
-    src/APBFramelessWindow/APBPushButton.h
     src/APBFramelessWindow/NativeTranslucentFramelessWindow.cpp
     src/APBFramelessWindow/NativeTranslucentFramelessWindow.h
   )
