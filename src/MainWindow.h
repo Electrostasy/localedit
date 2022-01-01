@@ -57,9 +57,9 @@ private slots:
 	void importFiles();
 	void exportFiles();
 	void handleUnsavedChangesBox(int action);
-	void readMission(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map);
-	void readTasks(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map);
-	void verifyFileNames(QFileDialog *dialog, QFile *missionTemplates, QFile *taskObjectives);
-	void exportMissions(QTextStream *output);
+	void readMission(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map) const;
+	void readTasks(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map) const;
+	void verifyFileNames(QFileDialog *dialog, QFile *missionTemplates, QFile *taskObjectives) const;
+	void exportMissions(QTextStream *output) const;
 };
 
