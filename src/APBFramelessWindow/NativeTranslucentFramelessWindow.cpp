@@ -2,7 +2,6 @@
 
 NativeTranslucentFramelessWindow::NativeTranslucentFramelessWindow(QWidget *parent): QWidget(parent), borderWidth(8) {
 	// Setup title bar
-	// this->setWindowTitle(applicationName);
 	this->titleBar = new APBFramelessWindowTitleBar();
 	this->titleBar->setAutoFillBackground(true);
 	this->titleBar->setFixedHeight(60);
@@ -43,15 +42,12 @@ NativeTranslucentFramelessWindow::NativeTranslucentFramelessWindow(QWidget *pare
 bool NativeTranslucentFramelessWindow::nativeEvent(const QByteArray &eventType, void *message, long *result) {
 	MSG *nativeMessage = static_cast<MSG *>(message);
 	LPARAM lparam = nativeMessage->lParam;
-	// WPARAM wparam = nativeMessage->wParam;
-	// HWND hwnd = nativeMessage->hwnd;
 	UINT msg = nativeMessage->message;
 
 	switch(msg) {
 		case WM_NCCALCSIZE: {
 			// Abort computing & drawing of the non client area.
 			*result = 0;
-
 			// Do not compute any further
 			return true;
 		}
@@ -146,7 +142,6 @@ bool NativeTranslucentFramelessWindow::isBottomLeftCornerHit(const QRect &iRect,
 
 bool NativeTranslucentFramelessWindow::isTitleBarHit(const QRect &iRect, const long iBorderWidth, long iX, long iY) {
 	bool isHeightSatisfied = iY >= iRect.top() && iY < iRect.top() + this->titleBar->height();
-	bool isWidthSatisfied = iX >= iRect.left() && iX < iRect.right() - this->titleBar->buttonsWidth();
-
+	bool isWidthSatisfied = iX >= iRect.left() && iX < iRect.right() - this->titleBar->buttonWidth();
 	return isHeightSatisfied && isWidthSatisfied;
 }

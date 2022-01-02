@@ -38,6 +38,8 @@ target_sources(${PROJECT_NAME} PRIVATE
   src/StagesEditor/TabWidget/FramedPage.h
   src/Utility/LayoutUtils.cpp
   src/Utility/LayoutUtils.h
+  src/Components/MessageBox.cpp
+  src/Components/MessageBox.h
   src/resources.qrc
 )
 

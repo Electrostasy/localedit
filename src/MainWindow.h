@@ -2,6 +2,7 @@
 
 #include <QtWidgets>
 
+#include "Components/MessageBox.h"
 #include "APBFramelessWindow/APBPushButton.h"
 #include "MissionList/MissionListItem.h"
 #include "MissionList/MissionListWidget.h"
@@ -24,19 +25,19 @@ namespace {
 #endif
 
 class MainWindow: public MainWindowBase {
-  Q_OBJECT
+	Q_OBJECT
 
-public:
+	public:
 	explicit MainWindow();
 	void updateTitle();
 
-public slots:
+	public slots:
 	void searchMissionList(const QString &filter);
 
-protected:
+	protected:
 	void paintEvent(QPaintEvent *paintEvent) override;
 
-private:
+	private:
 	const QString applicationName = "Localedit";
 	APBPushButton *importButton;
 	APBPushButton *exportButton;
@@ -50,8 +51,13 @@ private:
 	static QString handleStageText(const int &index, const QVector<MissionListItem::Stage> &stages);
 	static QString handleEmptyObjectives(const int &index, const QVector<MissionListItem::Stage> &stages);
 
-private slots:
+	private slots:
 	void importFiles();
 	void exportFiles();
+	void handleUnsavedChangesBox();
+	static QString verifyAndTrim(const QString &fileName);
+	void readMission(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map) const;
+	void readTasks(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map) const;
+	void verifyFileNames(QFileDialog const *dialog, QFile *missionTemplates, QFile *taskObjectives) const;
+	void exportMissions(QTextStream *output) const;
 };
-
