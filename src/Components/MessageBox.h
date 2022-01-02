@@ -7,5 +7,5 @@
 
 class MessageBox {
 	public:
-	static QMessageBox UnsavedChangesBox(const QString windowTitle);
+	static QMessageBox *UnsavedChangesBox(const QString windowTitle);
 };

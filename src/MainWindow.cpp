@@ -255,7 +255,7 @@ void MainWindow::paintEvent(QPaintEvent *paintEvent) {
 }
 
 void MainWindow::handleUnsavedChangesBox() {
-	int action = MessageBox::UnsavedChangesBox(this->applicationName).exec();
+	int action = MessageBox::UnsavedChangesBox(this->applicationName)->exec();
 
 	switch(action) {
 		case QMessageBox::Save:
