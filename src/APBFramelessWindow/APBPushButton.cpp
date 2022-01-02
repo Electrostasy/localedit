@@ -345,6 +345,3 @@ APBPushButton::TitleIcon APBPushButton::titleIcon() {
 	return this->titleBarIconType;
 }
 
-
-
-
