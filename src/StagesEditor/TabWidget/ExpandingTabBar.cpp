@@ -57,7 +57,7 @@ void ExpandingTabBar::paintEvent(QPaintEvent *paintEvent) {
 	painter->end();
 }
 
-void ExpandingTabBar::setBrush(QPainter* painter, int index) {
+void ExpandingTabBar::setBrush(QPainter* painter, int index) const {
 	if(index == this->currentIndex()) {
 		painter->setBrush(this->palette().highlight());
 	} else {
@@ -74,13 +74,11 @@ QRect ExpandingTabBar::createTabRect(int index) {
 	// Create gaps between tabs that aren't the first or last tab
 	int leftMargin = index != 0 ? outerPaintMargin / 2 : 0;
 	int rightMargin = index != this->count() - 1 ? outerPaintMargin / 2 : 0;
-	QRect tabRect = QRect(this->tabRect(index).left() + leftMargin, this->tabRect(index).top(),
+	return QRect(this->tabRect(index).left() + leftMargin, this->tabRect(index).top(),
 		this->tabRect(index).width() - rightMargin, this->tabRect(index).height());
-
-	return tabRect;
 }
 
-void ExpandingTabBar::restorePen(QPainter* painter, QPen pen, int index) {
+void ExpandingTabBar::restorePen(QPainter* painter, QPen pen, int index) const {
 	// Restore pen to draw text
 	pen.setStyle(Qt::PenStyle::SolidLine);
 	auto penColor =
