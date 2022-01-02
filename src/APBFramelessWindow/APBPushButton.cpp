@@ -29,61 +29,41 @@ APBPushButton::APBPushButton(const QString &text, QWidget *parent): APBPushButto
 bool APBPushButton::event(QEvent *event) {
 	QPalette palette = this->palette();
 
-	switch(event->type()) {
-		case QEvent::Type::HoverEnter:
-			if(this->isEnabled()) {
+	if(this->isEnabled()) {
+		switch(event->type()) {
+			case QEvent::Type::HoverEnter:
 				// If a QTimeLine object exists, start the blink timer, otherwise just make it brighter
 				if(this->timer != nullptr) {
 					this->startTimer(&palette);
 				} else {
 					this->setLighterColour(&palette);
 				}
-			}
-
-			break;
-		case QEvent::Type::HoverLeave:
-			if(this->isEnabled()) {
+				break;
+			case QEvent::Type::HoverLeave:
 				// If a QTimeLine object exists, stop the blink timer, otherwise just make it darker
 				if(this->timer != nullptr) {
 					this->stopTimer(&palette);
 				} else {
 					this->setDarkerColour(&palette);
 				}
-			}
-
-			break;
-		case QEvent::MouseButtonPress:
-			if(this->isEnabled()) {
+				break;
+			case QEvent::MouseButtonPress:
+			case QEvent::MouseButtonDblClick:
 				// If a QTimeLine object exists, stop the blink timer to retain highlight colours
 				if(this->timer != nullptr) {
 					this->stopTimer(&palette);
 				}
 				this->setHighlight(&palette);
-			}
-
-			break;
-		case QEvent::MouseButtonDblClick:
-			if(this->isEnabled()) {
-				// If a QTimeLine object exists, stop the blink timer to retain highlight colours
-				if(this->timer != nullptr) {
-					this->stopTimer(&palette);
-				}
-				this->setHighlight(&palette);
-			}
-
-			break;
-		case QEvent::MouseButtonRelease:
-			if(this->isEnabled()) {
+				break;
+			case QEvent::MouseButtonRelease:
 				this->restoreDefaults(&palette);
 				// If a QTimeLine object exists, start the blink timer instead of reverting to static colour
 				if(this->timer != nullptr) {
 					this->startTimer(&palette);
 				}
-			}
-
-			break;
-
-    default: {} // Other events are not handled by this switch-statement
+				break;
+			default: {} // Other events are not handled by this switch-statement
+		}
 	}
 
 	return QPushButton::event(event);
@@ -343,5 +323,7 @@ void APBPushButton::drawTitleBarIcon(QPainter *painter, const QRect &bounds) {
 		case TitleIcon::Close:
 			this->drawTitleBarClose(painter, bounds);
 			break;
+		default: {
+		}
 	}
 }
