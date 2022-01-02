@@ -30,7 +30,7 @@ void ExpandedTextEdit::showContextMenu(const QPoint &pos) {
 	connect(cut, &QAction::triggered, this, &QPlainTextEdit::cut);
 	connect(redo, &QAction::triggered, this, &QPlainTextEdit::redo);
 	connect(undo, &QAction::triggered, this, &QPlainTextEdit::undo);
-	connect(insertNewline, &QAction::triggered, this, [=]() {
+	connect(insertNewline, &QAction::triggered, this, [this]() {
 		this->textCursor().insertText("↵");
 	});
 
