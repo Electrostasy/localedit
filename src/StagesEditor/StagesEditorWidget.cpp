@@ -32,20 +32,8 @@ void StagesEditorWidget::buildStages(QWidget *page, const QVector<MissionListIte
 	}
 
 	// If there are more stages than the main window can show, we insure ourselves with a scroll area
-	auto *scrollableContent = new QWidget();
 	auto scrollableLayout = new QVBoxLayout();
-	scrollableContent->setLayout(scrollableLayout);
-
-	auto *scrollArea = new QScrollArea();
-	scrollArea->setWidgetResizable(true);
-	scrollArea->setWidget(scrollableContent);
-
-	// Back background of scroll area transparent
-	QPalette p = scrollArea->palette();
-	p.setColor(QPalette::ColorRole::Window, Qt::GlobalColor::transparent);
-	scrollArea->setPalette(p);
-	scrollArea->setContentsMargins(0, 0, 0, 0);
-	scrollArea->setFrameShape(QFrame::NoFrame);
+	auto scrollArea = setupScrollArea(scrollableLayout);
 
 	// Build stages UI
 	int stageIndex = 1;
@@ -69,11 +57,8 @@ void StagesEditorWidget::buildStages(QWidget *page, const QVector<MissionListIte
 		// If there are undo steps remaining, that means the mission currently being edited needs to be marked as
 		// having been modified, and if not - cleared of being marked modified
 		connect(textField, &QPlainTextEdit::textChanged, this, [currentItem, textField]() {
-			if(textField->document()->availableUndoSteps() > 0) {
-				currentItem->setData(Qt::ItemDataRole::DecorationRole, QIcon(":/resources/pending_changes"));
-			} else {
-				currentItem->setData(Qt::ItemDataRole::DecorationRole, QIcon());
-			}
+			auto icon = textField->document()->availableUndoSteps() > 0 ? QIcon(":/resources/pending_changes") : QIcon();
+			currentItem->setData(Qt::ItemDataRole::DecorationRole, icon);
 		});
 
 		// TODO: this doesn't correctly set a 3 line height
@@ -85,4 +70,21 @@ void StagesEditorWidget::buildStages(QWidget *page, const QVector<MissionListIte
 
 	scrollableLayout->addStretch(9);
 	page->layout()->addWidget(scrollArea);
+}
+
+QScrollArea *StagesEditorWidget::setupScrollArea(QVBoxLayout *scrollableLayout) {
+	auto *scrollableContent = new QWidget();
+	scrollableContent->setLayout(scrollableLayout);
+
+	auto *scrollArea = new QScrollArea();
+	scrollArea->setWidgetResizable(true);
+	scrollArea->setWidget(scrollableContent);
+
+	// Back background of scroll area transparent
+	QPalette p = scrollArea->palette();
+	p.setColor(QPalette::ColorRole::Window, Qt::GlobalColor::transparent);
+	scrollArea->setPalette(p);
+	scrollArea->setContentsMargins(0, 0, 0, 0);
+	scrollArea->setFrameShape(QFrame::NoFrame);
+	return scrollArea;
 }

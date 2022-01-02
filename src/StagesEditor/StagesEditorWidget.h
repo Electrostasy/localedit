@@ -20,4 +20,7 @@ class StagesEditorWidget: public QWidget {
 	QWidget *pageDispatch;
 
 	void buildStages(QWidget *page, const QVector<MissionListItem::Stage> &stages, MissionListItem *currentItem);
+
+	private:
+	QScrollArea *setupScrollArea(QVBoxLayout *scrollableLayout);
 };
