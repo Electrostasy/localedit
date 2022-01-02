@@ -1,6 +1,6 @@
 #include "MessageBox.h"
 
-QMessageBox MessageBox::UnsavedChangesBox(const Qstring windowTitle) {
+QMessageBox MessageBox::UnsavedChangesBox(const QString windowTitle) {
 	QMessageBox unsavedChangesBox;
 	unsavedChangesBox.setWindowTitle(windowTitle);
 	unsavedChangesBox.setText("You have unsaved changes.");
