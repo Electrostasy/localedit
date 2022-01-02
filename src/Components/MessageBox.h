@@ -2,6 +2,7 @@
 
 #include <QString>
 #include <QWidget>
+#include <QtWidgets>
 #include <string>
 
 class MessageBox {
