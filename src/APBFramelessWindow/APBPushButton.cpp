@@ -323,7 +323,7 @@ void APBPushButton::drawTitleBarIcon(QPainter *painter, const QRect &bounds) {
 		case TitleIcon::Close:
 			this->drawTitleBarClose(painter, bounds);
 			break;
-		default: {
-		}
+		default:  // do nothing;
+			break;
 	}
 }
