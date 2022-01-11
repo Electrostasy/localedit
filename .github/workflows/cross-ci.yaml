@@ -1,0 +1,61 @@
+name: CI Build
+
+on:
+  push:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+jobs:
+  skip-duplicate-actions:
+    name: Skip duplicate actions
+    runs-on: ubuntu-latest
+    outputs:
+      should-skip: ${{ steps.skip-check.outputs.should_skip }}
+
+    steps:
+      - id: skip-check
+        name: Check if workflow is not already running
+        uses: fkirc/skip-duplicate-actions@v3.4.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          concurrent_skipping: "same_content"
+          do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
+          
+  build:
+    needs: skip-duplicate-actions
+    if: ${{ needs.skip-duplicate-actions.outputs.should-skip != 'true' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        include:
+          - os: windows-latest
+            generator: 'Visual Studio 16 2019'
+          - os: ubuntu-latest
+            generator: 'Unix Makefiles'
+          - os: macos-latest
+            generator: 'Xcode'
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          dir: ${{ github.workspace }}
+        
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-QtCache
+        
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+        
+      - name: Build
+        run: |
+          cmake . -B '${{ github.workspace }}/build' -G'${{ matrix.generator }}'
+          cd build
+          cmake --build .
