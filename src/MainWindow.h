@@ -55,7 +55,7 @@ class MainWindow: public MainWindowBase {
 	void importFiles();
 	void exportFiles();
 	void handleUnsavedChangesBox();
-	static QString verifyAndTrim(const QString &fileName);
+	bool handleOverwritingChangesBox(const QString directory);
 	void readMission(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map) const;
 	void readTasks(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map) const;
 	void verifyFileNames(QFileDialog const *dialog, QFile *missionTemplates, QFile *taskObjectives) const;

@@ -8,4 +8,5 @@
 class MessageBox {
 	public:
 	static QMessageBox *UnsavedChangesBox(const QString windowTitle);
+	static QMessageBox *OverwritingFilesBox(const QString windowTitle, const QString directory);
 };

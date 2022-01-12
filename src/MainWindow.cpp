@@ -158,10 +158,20 @@ void MainWindow::exportFiles() {
 
 	if(dialog.exec()) {
 		QStringList directories = dialog.selectedFiles();
+		const QString missionTemplatesFile = "MissionTemplates.INT";
+		const QString taskObjectivesFile = "TaskObjectives.INT";
 		if(directories.size() == 1) {
+			// Notify the user they're about to overwrite files, if they exist
+			if (auto directory = directories.first();
+				!QDir(directory).entryList({
+					"*" + missionTemplatesFile,
+					"*" + taskObjectivesFile
+				}).empty() && !this->handleOverwritingChangesBox(directory)) {
+			}
+			
 			const QString &url = directories.at(0);
 
-			QFile missionTemplates(url + "/MissionTemplates.INT");
+			QFile missionTemplates(url + "/" + missionTemplatesFile);
 			if(!missionTemplates.open(QIODevice::WriteOnly | QIODevice::Text)) {
 				return;
 			}
@@ -180,7 +190,7 @@ void MainWindow::exportFiles() {
 			// Reuse the same QTextStream object
 			output.flush();
 
-			QFile taskObjectives(url + "/TaskObjectives.INT");
+			QFile taskObjectives(url + "/" + taskObjectivesFile);
 			if(!taskObjectives.open(QIODevice::WriteOnly | QIODevice::Text)) {
 				return;
 			}
@@ -236,12 +246,6 @@ void MainWindow::writeInfoHeader(QTextStream &stream) {
 	stream << ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n\n";
 }
 
-QString MainWindow::verifyAndTrim(const QString &fileName) {
-	QRegularExpression rx("(?:BRA|FRA|GER|INT|ITA|RUS|SPA)\\/(?<fileName>\\w+)");
-	QRegularExpressionMatch match = rx.match(fileName);
-	return match.captured("fileName");
-}
-
 // Tint the background colour of the window
 void MainWindow::paintEvent(QPaintEvent *paintEvent) {
 	auto *painter = new QPainter(this);
@@ -273,6 +277,24 @@ void MainWindow::handleUnsavedChangesBox() {
 			// should never be reached
 			break;
 	}
+}
+
+bool MainWindow::handleOverwritingChangesBox(const QString directory) {
+	int action = MessageBox::OverwritingFilesBox(this->applicationName, directory)->exec();
+
+	switch(action) {
+		case QMessageBox::Ok:
+			// Ok was clicked
+			return true;
+		case QMessageBox::Cancel:
+			// Cancel was clicked
+			return false;
+		default:
+			// should never be reached
+			break;
+	}
+	
+	return false;
 }
 
 void MainWindow::readMission(QTextStream *stream, QString line, QMap<QString, MissionListItem *> *map) const {
@@ -336,20 +358,25 @@ void MainWindow::readTasks(QTextStream *stream, QString line, QMap<QString, Miss
 }
 
 void MainWindow::verifyFileNames(QFileDialog const *dialog, QFile *missionTemplates, QFile *taskObjectives) const {
-	QStringList fileNames = dialog->selectedFiles();
-	for(auto const &fileName: fileNames) {
+	for(auto const &file: dialog->selectedFiles()) {
 		// Check if required files are contained in fileNames and trim the path and extension
-		const QString trimmed = verifyAndTrim(fileName);
+		const auto fileInfo = QFileInfo(file);
+		const auto fileName = fileInfo.fileName();
+		const auto filePath = fileInfo.absoluteFilePath();
+		
+		if (!QDir::match({ "*.INT", "*.GER", "*.ITA", "*.RUS", "*.SPA", "*.FRA", "*.BRA" }, fileName)) {
+			break;
+		}
 
-		if(trimmed == "MissionTemplates") {
-			missionTemplates->setFileName(fileName);
+		if(fileName.startsWith("MissionTemplates")) {
+			missionTemplates->setFileName(filePath);
 			if(!missionTemplates->open(QIODevice::ReadOnly | QIODevice::Text)) {
 				return;
 			}
 		}
 
-		if(trimmed == "TaskObjectives") {
-			taskObjectives->setFileName(fileName);
+		if(fileName.startsWith("TaskObjectives")) {
+			taskObjectives->setFileName(filePath);
 			if(!taskObjectives->open(QIODevice::ReadOnly | QIODevice::Text)) {
 				return;
 			}
